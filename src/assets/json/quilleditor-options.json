@@ -1,0 +1,19 @@
+{
+  "discuss": {
+    "theme": "snow",
+    "placeholder": "請輸入您的討論訊息",
+    "modules": {
+      "toolbar": [
+        [
+          "bold",
+          "italic",
+          "underline",
+          "strike",
+          { "background": [] },
+          { "color": [] },
+          { "align": [] }
+        ]
+      ]
+    }
+  }
+}

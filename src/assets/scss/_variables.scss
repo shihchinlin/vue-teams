@@ -1,0 +1,72 @@
+// Variable overrides
+
+// Color system
+@import "variables/colors";
+
+// Typography
+@import "variables/typography";
+
+// Forms
+$input-bg: $white;
+$input-border-color: $secondary;
+$input-group-addon-color: $white;
+$input-group-addon-bg: $secondary;
+$input-group-addon-border-color: $input-border-color;
+
+// Shadows
+$shadow: (
+  "box": 0px 3px 6px 0px transparentize($secondary, 0.5),
+  "text": 0px 0px 4px $white,
+  "box_hovered": (
+    0px 0px 20px 0px transparentize($tone, 0.75),
+    0px 3px 6px 0px transparentize($secondary, 0.5)
+  ),
+  "box_focused": (
+    0px 0px 8px 0px transparentize($danger, 0.25),
+    0px 3px 6px 0px transparentize($secondary, 0.25)
+  ),
+  "component_hovered": (
+    0px 0px 3px 1px transparentize($secondary, 0.25)
+  ),
+  "component_focused": (
+    0px 0px 3px 1px transparentize($danger, 0.25)
+  ),
+  "separator": transparentize($dark, 0.8)
+);
+
+// Animations
+$transition-duration: 0.2s;
+
+// Breadcrumbs
+$breadcrumb-bg: $white;
+$breadcrumb-height: 46px;
+
+// Body
+$body-bg: $light;
+
+// Header
+$header-heights: (
+  "md": 70px,
+  "sm": 52px
+);
+
+// Navbar
+$navbar-height: 70px;
+
+// Sidebar
+$sidebar-width: 250px;
+
+// Footer
+$bottom-heights: (
+  "md": 50px,
+  "sm": 56px
+);
+
+// Search bars
+$searchbar_widths: (
+  "xl": calc(100% - 810px),
+  "lg": calc(100% - 700px),
+  "md": calc(100% - 420px),
+  "sm": calc(100% - 155px),
+  "xs": calc(100% - 155px)
+);

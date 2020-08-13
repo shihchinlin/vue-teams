@@ -1,0 +1,85 @@
+// Here you can add other styles
+:fullscreen,
+:-webkit-full-screen,
+:-moz-full-screen,
+:-ms-fullscreen {
+  background-color: $light !important;
+}
+
+.ql-container {
+  font-family: inherit !important;
+}
+
+.modal-backdrop {
+  background-color: desaturate($tone, 30%);
+  opacity: 0.85;
+}
+
+.modal-2xl {
+  max-width: 90% !important;
+}
+
+.modal-max {
+  max-width: 100% !important;
+}
+
+$cursors: auto, default, pointer, move, not-allowed, grab;
+@each $cursor in $cursors {
+  .cursor-#{$cursor} {
+    cursor: #{$cursor};
+  }
+}
+
+.mask-wrapper {
+  position: relative;
+
+  > .mask {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    z-index: 999;
+    background-color: rgba(0, 0, 0, 0);
+  }
+}
+
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+}
+
+.b-avatar {
+  > .b-avatar-text {
+    font-size: 18px !important;
+    line-height: 2.5em;
+  }
+
+  .b-avatar-badge {
+    min-height: 0.8em;
+    min-width: 0.8em;
+    box-shadow: 0px 0px 1px 2px $white;
+  }
+}
+
+.hr-desc {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid $secondary;
+  line-height: 0.1em;
+  margin: 20px 0;
+
+  span {
+    background: #fff;
+    padding: 0 10px;
+    color: $secondary;
+  }
+}
+
+@media print {
+  @page {
+    size: 297mm 210mm; /* landscape */
+    margin: 12.7mm;
+  }
+}

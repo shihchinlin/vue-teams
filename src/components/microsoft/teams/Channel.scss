@@ -1,0 +1,194 @@
+.discuss-modal .channel,
+.channel-wrapper > .channel {
+  .error .icon {
+    float: none !important;
+    margin-right: auto !important;
+
+    + div .h3 {
+      text-align: center !important;
+    }
+  }
+
+  .message {
+    &.hovered {
+      box-shadow: map-get($shadow, "component_hovered");
+    }
+
+    > .border-left {
+      border-left-width: 3px !important;
+    }
+
+    .b-avatar {
+      filter: saturate(0.8);
+
+      .b-avatar-text,
+      .b-avatar-badge {
+        box-shadow: 0px 0px 0px 2px $light;
+        filter: saturate(1.25);
+      }
+    }
+
+    .content {
+      p:last-child {
+        margin-bottom: 0;
+      }
+    }
+
+    > div > div > .actions {
+      top: 4px;
+      right: 6px;
+    }
+  }
+}
+
+.channel-wrapper > .channel .message > .content {
+  word-break: break-all;
+}
+
+.discuss-modal .message-editor.channel,
+.channel-wrapper + .message-editor.channel {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  right: 0;
+  z-index: 1030;
+  min-height: 149px !important;
+
+  .quill-editor {
+    .ql-container {
+      height: calc(100% - 18px - 6px - 0.5rem - 1px);
+    }
+  }
+}
+
+.discuss-modal .message-editor.channel,
+.channel-wrapper + .message-editor.channel,
+.message .message-editor.content,
+.message .message-editor.reply {
+  background-image: linear-gradient(to bottom, $light, $white 25%, $white);
+  min-height: 150px;
+
+  &.droppable {
+    > .mask {
+      display: flex !important;
+      align-items: center;
+      justify-content: center;
+      background-color: transparentize($danger, 0.5) !important;
+      opacity: 0.2;
+
+      &::after {
+        display: block;
+        margin-top: auto;
+        margin-bottom: auto;
+        content: "- 放開 -";
+        color: $danger !important;
+        font-size: 3.5rem;
+      }
+    }
+  }
+
+  .quill-editor {
+    display: flex;
+    flex-direction: column;
+
+    .ql-toolbar {
+      border: 0 !important;
+      padding: 0.25rem 0;
+
+      .ql-formats {
+        margin-right: 0px !important;
+      }
+    }
+
+    .ql-container {
+      border: 0 !important;
+      font-family: $font-family-sans-serif !important;
+
+      .ql-editor {
+        padding-bottom: 28px;
+        font-size: 14px;
+        line-height: 1.5 !important;
+
+        .mention {
+          padding-right: 0.6em;
+          padding-left: 0.6em;
+          background-color: #999;
+          border-radius: 10rem;
+          color: #f6f6f6 !important;
+          user-select: all;
+
+          .ql-mention-denotation-char {
+            padding-right: 3px;
+          }
+        }
+
+        .mention[data-denotation-char="@"],
+        .mention[data-denotation-char="#"] {
+          .ql-mention-denotation-char {
+            font-family: "Font Awesome 5 Free";
+            font-weight: 900;
+            font-size: 0;
+
+            &:before {
+              font-size: 14px;
+            }
+          }
+        }
+
+        .mention[data-denotation-char="@"] .ql-mention-denotation-char:before {
+          content: "\f007";
+        }
+
+        .mention[data-denotation-char="#"] .ql-mention-denotation-char:before {
+          content: "\f080";
+        }
+      }
+
+      .ql-mention-list-container {
+        max-height: 640px;
+        overflow-y: auto;
+        border-radius: 0.25rem;
+        box-shadow: map-get($shadow, "box_hovered");
+        z-index: 1;
+
+        .ql-mention-list {
+          margin-bottom: 0;
+
+          .ql-mention-list-item {
+            cursor: pointer;
+
+            &.selected {
+              color: #616161;
+              background-color: #f5f5f5;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  .actions {
+    right: -4px;
+    bottom: 0px;
+    opacity: 0.75;
+
+    .btn {
+      transition-property: color, margin-right;
+      box-shadow: map-get($shadow, "component_hovered");
+    }
+
+    &:hover {
+      opacity: 9;
+    }
+  }
+}
+
+.discuss-modal .message-editor.channel,
+.channel-wrapper + .message-editor.channel,
+.message .message-editor.reply {
+  border-top: 1px solid $gray-400 !important;
+}
+
+.message .message-editor.reply {
+  border-bottom: 3px solid;
+}

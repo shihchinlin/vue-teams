@@ -1,0 +1,14 @@
+// Costomize global variables
+@import "variables";
+
+// Import global mixins
+@import "mixins";
+
+// Import global styles
+@import "custom";
+
+// Import pre-defined animations
+@import "animations";
+
+// Import IE fixs
+@import "ie-fix";
