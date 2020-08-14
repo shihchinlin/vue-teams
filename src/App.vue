@@ -6,7 +6,7 @@
       v-if="tenantId && clientId && redirectUri && teamId && channelId"
     />
     <form class="config">
-      <img src="/img/logo.png" />
+      <img src="@/assets/img/logo.png" />
       <div role="group" class="input-group">
         <div class="input-group-prepend">
           <div class="input-group-text">tenantId</div>
@@ -45,6 +45,23 @@
         <b-form-input v-model="channelId" placeholder="Enter your channelId">
         </b-form-input>
       </div>
+      <h6>
+        Username: <strong>vue-teams@chtdev.onmicrosoft.com</strong> Password:
+        <strong>NTT5ySrZaMKvfFgh</strong>
+      </h6>
+      <h6>
+        Above default parameters represent a precreated channel in Microsoft
+        Teams residented in a trial Azure Active Directory Tenant provided by
+        Microsoft 365 Developer Program.
+      </h6>
+      <h6>
+        Due to the limited trial time, you may not be able to load the channel
+        at this time.
+        <a href="https://github.com/shihchinlin/vue-teams/issues">
+          Send an issue
+        </a>
+        to acknowlege me to refresh those parameters.
+      </h6>
     </form>
   </div>
 </template>
@@ -59,15 +76,13 @@ export default {
   },
   data() {
     return {
-      tenantId: "",
-      clientId: "",
+      process: process,
+      tenantId: "0c713f17-ba1e-4787-bc07-e6f81403f893",
+      clientId: "33f3987d-2100-434a-8741-f291b1ef485e",
       redirectUri: location.origin + process.env.BASE_URL.slice(0, -1),
-      teamId: "",
-      channelId: "",
+      teamId: "bd1b1453-1893-41ea-a942-a5bd31dd643f",
+      channelId: "19:73c5d1240a6a4cfaa373f031c33d2105@thread.tacv2",
     };
-  },
-  mounted() {
-    console.log();
   },
 };
 </script>
@@ -117,6 +132,13 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
         width: 100px;
         text-align: right;
       }
+    }
+
+    > h6 {
+      width: 75%;
+      margin-top: 1.5rem;
+      margin-right: auto;
+      margin-left: auto;
     }
   }
 }
