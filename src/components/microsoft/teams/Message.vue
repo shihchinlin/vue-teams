@@ -107,8 +107,8 @@
         ></div>
         <MessageEditor
           class="content border-0"
-          :team_id="team_id"
-          :channel_id="channel_id"
+          :teamId="teamId"
+          :channelId="channelId"
           :message_id="message.id"
           :message="message"
           v-else
@@ -118,8 +118,8 @@
         <div class="replies" v-if="is_in_channel">
           <Message
             class="reply my-2"
-            :team_id="team_id"
-            :channel_id="channel_id"
+            :teamId="teamId"
+            :channelId="channelId"
             :message="reply"
             v-for="reply in replies"
             :key="reply.id"
@@ -151,8 +151,8 @@
       <div class="replies" v-if="is_in_channel">
         <Message
           class="reply my-2"
-          :team_id="team_id"
-          :channel_id="channel_id"
+          :teamId="teamId"
+          :channelId="channelId"
           :message="reply"
           v-for="reply in replies"
           :key="reply.id"
@@ -175,8 +175,8 @@
     <MessageEditor
       ref="reply_editor"
       :class="['reply', 'rounded-bottom', 'border-' + color_variant_me]"
-      :team_id="team_id"
-      :channel_id="channel_id"
+      :teamId="teamId"
+      :channelId="channelId"
       :message_id="message.id"
       v-if="
         is_in_channel &&
@@ -209,8 +209,8 @@ export default {
     MessageEditor,
   },
   props: {
-    team_id: { type: String, required: true },
-    channel_id: { type: String, required: true },
+    teamId: { type: String, required: true },
+    channelId: { type: String, required: true },
     message: {
       type: Object,
       required: true,
@@ -284,8 +284,8 @@ export default {
         this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn
       ) {
         return listMessageReplies(
-          this.team_id,
-          this.channel_id,
+          this.teamId,
+          this.channelId,
           this.message.id
         ).then((replies) => {
           this.replies = replies.reverse();
@@ -402,8 +402,8 @@ export default {
               i.getAttribute("target-src")
             ).split("/")[11];
             getHostedContent(
-              this.team_id,
-              this.channel_id,
+              this.teamId,
+              this.channelId,
               this.message.id,
               hosted_content_id
             )

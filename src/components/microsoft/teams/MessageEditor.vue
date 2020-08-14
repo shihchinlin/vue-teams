@@ -115,8 +115,8 @@ export default {
     VueQuillEditor,
   },
   props: {
-    team_id: { type: String, required: true },
-    channel_id: { type: String, required: true },
+    teamId: { type: String, required: true },
+    channelId: { type: String, required: true },
     message_id: { type: String, default: null },
     message: { type: Object, default: null },
   },
@@ -249,7 +249,7 @@ export default {
     },
     async suggestMembers(keyword) {
       if (this.members === null) {
-        this.members = await listChannelMembers(this.team_id, this.channel_id);
+        this.members = await listChannelMembers(this.teamId, this.channelId);
         this.members.forEach((i) => {
           if (
             !Object.keys(this.$store.state.microsoft.presences).includes(
@@ -315,8 +315,8 @@ export default {
             } else {
               let api = this.message_id
                 ? replyToMessage(
-                    this.team_id,
-                    this.channel_id,
+                    this.teamId,
+                    this.channelId,
                     this.message_id,
                     this.transformMessageFromQuillToGraph(
                       this.body.content,
@@ -324,8 +324,8 @@ export default {
                     )
                   )
                 : sendMessage(
-                    this.team_id,
-                    this.channel_id,
+                    this.teamId,
+                    this.channelId,
                     this.transformMessageFromQuillToGraph(
                       this.body.content,
                       this.mentions
@@ -557,10 +557,10 @@ export default {
       },
       deep: true,
     },
-    team_id() {
+    teamId() {
       this.members = null;
     },
-    channel_id() {
+    channelId() {
       this.members = null;
     },
   },

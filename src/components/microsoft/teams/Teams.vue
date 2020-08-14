@@ -28,20 +28,18 @@
   <div
     v-else-if="
       $store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn &&
-        is_discussable
+        isLoaded
     "
     class="discuss position-relative"
   >
     <VuePerfectScrollbar
       ref="channel_wrapper"
       class="channel-wrapper"
-      v-if="!showing_modal"
+      v-if="!showingModal"
     >
       <Channel
         ref="channel"
-        :tenant_id="$store.state.session.config.MICROSOFT_GRAPH.TENANT_ID"
-        :team_id="team_id"
-        :channel_id="channel_id"
+        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
         @loaded="scrollToBottom($refs['channel_wrapper'])"
         @reset="scrollToTop($refs['channel_wrapper'])"
         @mentioned="
@@ -51,11 +49,10 @@
     </VuePerfectScrollbar>
     <MessageEditor
       ref="message_editor"
-      :team_id="team_id"
-      :channel_id="channel_id"
+      v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
       :default_opened="true"
       class="channel fixed"
-      v-if="!showing_modal"
+      v-if="!showingModal"
       @replied="
         $refs['channel'].loadMessages().then(() => {
           scrollToBottom($refs['channel_wrapper']);
@@ -64,7 +61,7 @@
     />
     <b-modal
       ref="discuss_modal"
-      v-model="showing_modal"
+      v-model="showingModal"
       modal-class="discuss-modal"
       size="lg"
       centered
@@ -73,11 +70,9 @@
     >
       <Channel
         ref="channel"
-        :tenant_id="$store.state.session.config.MICROSOFT_GRAPH.TENANT_ID"
-        :team_id="team_id"
-        :channel_id="channel_id"
+        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
         @loaded="
-          (showing_message_editor_in_modal = true) &&
+          (showingMessageEditorInModal = true) &&
             scrollToBottom($refs['discuss_modal'])
         "
         @reset="scrollToTop($refs['discuss_modal'])"
@@ -87,11 +82,10 @@
       />
       <MessageEditor
         ref="message_editor"
-        :team_id="team_id"
-        :channel_id="channel_id"
+        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
         :default_opened="true"
         class="channel fixed"
-        v-if="showing_message_editor_in_modal"
+        v-if="showingMessageEditorInModal"
         @replied="
           $refs['channel'].loadMessages().then(() => {
             scrollToBottom($refs['discuss_modal']);
@@ -105,13 +99,13 @@
       size="sm"
       pill
       v-b-tooltip.hover="'放大檢視'"
-      v-if="!showing_modal"
-      @click="showing_modal = true"
+      v-if="!showingModal"
+      @click="showingModal = true"
     >
       <i class="fa fa-expand"></i>
     </b-button>
   </div>
-  <UndiscussableMediaType v-else-if="!is_discussable" />
+  <UndiscussableMediaType v-else-if="!isLoaded" />
 </template>
 
 <script>
@@ -140,37 +134,31 @@ export default {
     MessageEditor,
     Spinner,
   },
+  props: {
+    tenantId: { type: String, required: true },
+    clientId: { type: String, required: true },
+    redirectUri: { type: String, required: true },
+    teamId: { type: String, required: true },
+    channelId: { type: String, required: true },
+  },
   data: () => {
     return {
       MicrosoftGraphStatus: MicrosoftGraphStatus,
-      showing_modal: false,
-      showing_message_editor_in_modal: false,
-      is_discussable: true,
-      team_id: "",
-      channel_id: "",
+      showingModal: false,
+      showingMessageEditorInModal: false,
+      isLoaded: true,
     };
   },
   methods: {
-    async loadDiscuss() {
+    async loadChannel() {
+      this.isLoaded = false;
       if (this.$store.state.microsoft.status !== MicrosoftGraphStatus.LoggedIn)
-        await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST");
-      try {
-        const response = {
-          teamId: this.$store.state.session.config.MICROSOFT_GRAPH._TEAM_ID,
-          channelId: this.$store.state.session.config.MICROSOFT_GRAPH,
-        };
-
-        if (response.teamId && response.channelId) {
-          this.team_id = response.teamId;
-          this.channel_id = response.channelId;
-          this.is_discussable = true;
-        } else {
-          this.is_discussable = false;
-        }
-      } catch (e) {
-        this.team_id = "";
-        this.channel_id = "";
-      }
+        await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
+          tenantId: this.tenantId,
+          clientId: this.clientId,
+          redirectUri: this.redirectUri,
+        });
+      this.isLoaded = true;
     },
     scrollToBottom(element) {
       this.$nextTick(() => {
@@ -203,58 +191,36 @@ export default {
     },
   },
   mounted() {
-    this.loadDiscuss();
+    this.loadChannel();
   },
   watch: {
     "$route.path": function() {
-      this.loadDiscuss();
+      this.loadChannel();
     },
   },
 };
 </script>
 
 <style lang="scss">
-.aside-menu-fixed {
-  .aside-menu {
-    .discuss {
-      .channel-wrapper {
-        height: calc(100vh - 1px - 150px);
-      }
+.teams {
+  .channel-wrapper {
+    height: calc(100% - 1px - 150px);
+  }
 
-      > .action {
-        bottom: 8px;
-        left: 8px;
-        z-index: 1030;
-        box-shadow: map-get($shadow, "component_hovered");
-      }
-    }
-
-    .tab-pane > .error .icon {
-      float: none !important;
-      margin-right: auto !important;
-
-      + div .h3 {
-        text-align: center !important;
-      }
-    }
+  > .action {
+    bottom: 8px;
+    left: 8px;
+    z-index: 1030;
+    box-shadow: map-get($shadow, "component_hovered");
   }
 }
 
-.aside-menu-fixed .app.presentation {
-  .aside-menu {
-    .discuss .channel-wrapper {
-      height: calc(100vh - 1px - 150px);
-    }
+.error .icon {
+  float: none !important;
+  margin-right: auto !important;
+
+  + div .h3 {
+    text-align: center !important;
   }
 }
-
-// @include media-breakpoint-down("sm") {
-//   .aside-menu-fixed {
-//     .aside-menu {
-//       .discuss .channel-wrapper {
-//         height: calc(100vh - 1px - 150px);
-//       }
-//     }
-//   }
-// }
 </style>

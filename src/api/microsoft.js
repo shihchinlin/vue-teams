@@ -122,14 +122,12 @@ class MSALAuthenticationProvider {
   }
 }
 
-export const login = () => {
+export const login = (tenantId, clientId, redirectUri) => {
   const msalConfig = Object.assign(msalBaseConfig, {
     auth: {
-      clientId: store.state.session.config.MICROSOFT_GRAPH.CLIENT_ID,
-      authority:
-        "https://login.microsoftonline.com/" +
-        store.state.session.config.MICROSOFT_GRAPH.TENANT_ID,
-      redirectUri: store.state.session.config.MICROSOFT_GRAPH.REDIRECT_URI,
+      clientId: clientId,
+      authority: "https://login.microsoftonline.com/" + tenantId,
+      redirectUri: redirectUri,
     },
   });
   const msalApplication = new msal.PublicClientApplication(msalConfig);

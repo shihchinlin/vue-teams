@@ -12,13 +12,13 @@
           id="channel_info"
           :href="
             'https://teams.microsoft.com/l/channel/' +
-              encodeURI(channel_id) +
+              encodeURI(channelId) +
               '/' +
               encodeURI(encodeURI(channel.displayName)) +
               '?groupId=' +
-              team_id +
+              teamId +
               '&tenantId=' +
-              tenant_id
+              tenantId
           "
           target="_blank"
           v-b-tooltip.hover="
@@ -35,8 +35,8 @@
     </div>
     <Message
       class="mt-3"
-      :team_id="team_id"
-      :channel_id="channel_id"
+      :teamId="teamId"
+      :channelId="channelId"
       :message="message"
       v-for="message in messages"
       :key="message.id"
@@ -55,7 +55,7 @@ import {
   getTeam,
   getChannel,
   refreshPresences,
-  listChannelMessages
+  listChannelMessages,
 } from "@/api/microsoft";
 import Message from "@/components/microsoft/teams/Message";
 import Spinner from "@/components/Spinner";
@@ -64,24 +64,26 @@ export default {
   name: "Channel",
   components: {
     Message,
-    Spinner
+    Spinner,
   },
   props: {
-    tenant_id: { type: String, required: true },
-    team_id: { type: String, required: true },
-    channel_id: { type: String, required: true }
+    tenantId: { type: String, required: true },
+    clientId: { type: String, required: true },
+    redirectUri: { type: String, required: true },
+    teamId: { type: String, required: true },
+    channelId: { type: String, required: true },
   },
   data: function() {
     return {
       team: {},
       channel: {},
-      messages: []
+      messages: [],
     };
   },
   computed: {
-    team_id_channel_id() {
-      return this.team_id + this.channel_id;
-    }
+    teamId_channelId() {
+      return this.teamId + this.channelId;
+    },
   },
   methods: {
     loadChannel() {
@@ -90,10 +92,10 @@ export default {
       ) {
         this.messages = [];
         this.$emit("reset");
-        getTeam(this.team_id)
-          .then(team => {
+        getTeam(this.teamId)
+          .then((team) => {
             this.team = team;
-            getChannel(this.team_id, this.channel_id).then(channel => {
+            getChannel(this.teamId, this.channelId).then((channel) => {
               this.channel = channel;
               return this.loadMessages().then(() => {
                 this.$nextTick(() => {
@@ -106,7 +108,7 @@ export default {
               });
             });
           })
-          .catch(error => {
+          .catch((error) => {
             if (error.statusCode === 403)
               this.$store.state.microsoft.status =
                 MicrosoftGraphStatus.Forbidden;
@@ -129,8 +131,8 @@ export default {
       if (
         this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn
       ) {
-        return listChannelMessages(this.team_id, this.channel_id).then(
-          messages => {
+        return listChannelMessages(this.teamId, this.channelId).then(
+          (messages) => {
             for (let message of messages) {
               if (
                 message.from &&
@@ -169,16 +171,16 @@ export default {
     },
     emitEventDebounced: _.debounce(function(event) {
       this.$emit(event);
-    }, 500)
+    }, 500),
   },
   mounted() {
-    if (this.team_id_channel_id) this.loadChannel();
+    if (this.teamId_channelId) this.loadChannel();
   },
   watch: {
-    team_id_channel_id() {
+    teamId_channelId() {
       this.loadChannel();
-    }
-  }
+    },
+  },
 };
 </script>
 
