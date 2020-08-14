@@ -1,17 +1,75 @@
 // Variable overrides
+$white: #fff;
+$gray-100: #f8f9fa;
+$gray-200: #e9ecef;
+$gray-300: #dee2e6;
+$gray-400: #ced4da;
+$gray-500: #adb5bd;
+$gray-600: #6c757d;
+$gray-700: #495057;
+$gray-800: #343a40;
+$gray-900: #212529;
+$black: #000;
 
-// Color system
-@import "variables/colors";
+$blue: #0d6efd;
+$indigo: #6610f2;
+$purple: #6f42c1;
+$pink: #d63384;
+$red: #dc3545;
+$orange: #fd7e14;
+$yellow: #ffc107;
+$green: #28a745;
+$teal: #20c997;
+$cyan: #17a2b8;
 
-// Typography
-@import "variables/typography";
+// theme colors variables from Bootstrap
+$primary: $blue;
+$secondary: $gray-600;
+$success: $green;
+$info: $cyan;
+$warning: $yellow;
+$danger: $red;
+$light: $gray-100;
+$dark: $gray-800;
 
-// Forms
-$input-bg: $white;
-$input-border-color: $secondary;
-$input-group-addon-color: $white;
-$input-group-addon-bg: $secondary;
-$input-group-addon-border-color: $input-border-color;
+$gray-light: $gray-400;
+$gray: $gray-500;
+$gray-dark: $gray-800;
+$dark: $gray-900;
+$tone: $gray;
+
+$colors: (
+  "blue": $blue,
+  "indigo": $indigo,
+  "purple": $purple,
+  "pink": $pink,
+  "red": $red,
+  "orange": $orange,
+  "yellow": $yellow,
+  "green": $green,
+  "teal": $teal,
+  "cyan": $cyan,
+  "white": $white,
+  "gray": $gray,
+  "gray-light": $gray-light,
+);
+
+$theme-colors: (
+  "primary": $primary,
+  "secondary": $secondary,
+  "success": $success,
+  "info": $info,
+  "warning": $warning,
+  "danger": $danger,
+  "light": $light,
+  "dark": $dark,
+  "white": $white,
+);
+
+$font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
+  "Noto Sans CJK TC", "Microsoft JhengHei UI", sans-serif, "Segoe UI", Roboto,
+  Arial, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol",
+  "Noto Color Emoji";
 
 // Shadows
 $shadow: (
@@ -19,54 +77,20 @@ $shadow: (
   "text": 0px 0px 4px $white,
   "box_hovered": (
     0px 0px 20px 0px transparentize($tone, 0.75),
-    0px 3px 6px 0px transparentize($secondary, 0.5)
+    0px 3px 6px 0px transparentize($secondary, 0.5),
   ),
   "box_focused": (
     0px 0px 8px 0px transparentize($danger, 0.25),
-    0px 3px 6px 0px transparentize($secondary, 0.25)
+    0px 3px 6px 0px transparentize($secondary, 0.25),
   ),
   "component_hovered": (
-    0px 0px 3px 1px transparentize($secondary, 0.25)
+    0px 0px 3px 1px transparentize($secondary, 0.25),
   ),
   "component_focused": (
-    0px 0px 3px 1px transparentize($danger, 0.25)
+    0px 0px 3px 1px transparentize($danger, 0.25),
   ),
-  "separator": transparentize($dark, 0.8)
+  "separator": transparentize($dark, 0.8),
 );
-
-// Animations
-$transition-duration: 0.2s;
-
-// Breadcrumbs
-$breadcrumb-bg: $white;
-$breadcrumb-height: 46px;
 
 // Body
 $body-bg: $light;
-
-// Header
-$header-heights: (
-  "md": 70px,
-  "sm": 52px
-);
-
-// Navbar
-$navbar-height: 70px;
-
-// Sidebar
-$sidebar-width: 250px;
-
-// Footer
-$bottom-heights: (
-  "md": 50px,
-  "sm": 56px
-);
-
-// Search bars
-$searchbar_widths: (
-  "xl": calc(100% - 810px),
-  "lg": calc(100% - 700px),
-  "md": calc(100% - 420px),
-  "sm": calc(100% - 155px),
-  "xs": calc(100% - 155px)
-);

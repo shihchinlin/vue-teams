@@ -101,7 +101,6 @@ import {
   replyToMessage,
   listChannelMembers,
 } from "@/api/microsoft";
-import quillEditorOptions from "@/assets/json/quilleditor-options";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
@@ -120,6 +119,8 @@ export default {
   },
   data: function() {
     return {
+      isMobile: false,
+      isAppleIOSWebView: false,
       isActionsHovered: false,
       isMentioningMember: false,
       isMemberMentioned: false,
@@ -133,35 +134,47 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("session", ["isMobile", "isAppleIOSWebview"]),
     ...mapGetters({ isMentioningCard: "card/is_selectable" }),
     quillEditorOptions() {
-      let modules = Object.assign({}, quillEditorOptions.discuss.modules);
-      modules.mention = {
-        source: this.showMentionSuggestions,
-        renderItem: this.renderMentionSuggestion,
-        allowedChars: /^[a-zA-Z0-9_\-\p{Unified_Ideograph}]*$/u,
-        mentionDenotationChars: ["@", "#"],
-        defaultMenuOrientation: "top",
-        dataAttributes: [
-          "id",
-          "value",
-          "denotationChar",
-          "mentionedUserId",
-          "href",
-        ],
-        onSelect: this.handleMentionSuggestionSelected,
-        mentionContainerClass: "ql-mention-list-container",
-        mentionListClass: "ql-mention-list list-group",
-        listItemClass:
-          "ql-mention-list-item list-group-item list-group-item-action p-2",
+      return {
+        theme: "snow",
+        placeholder: "請輸入您的討論訊息",
+        modules: {
+          toolbar: [
+            [
+              "bold",
+              "italic",
+              "underline",
+              "strike",
+              { background: [] },
+              { color: [] },
+              { align: [] },
+            ],
+          ],
+          clipboard: {
+            matchers: [["span.mention", this.trimMentionBadgeStyle]],
+          },
+          mention: {
+            source: this.showMentionSuggestions,
+            renderItem: this.renderMentionSuggestion,
+            allowedChars: /^[a-zA-Z0-9_\-\p{Unified_Ideograph}]*$/u,
+            mentionDenotationChars: ["@", "#"],
+            defaultMenuOrientation: "top",
+            dataAttributes: [
+              "id",
+              "value",
+              "denotationChar",
+              "mentionedUserId",
+              "href",
+            ],
+            onSelect: this.handleMentionSuggestionSelected,
+            mentionContainerClass: "ql-mention-list-container",
+            mentionListClass: "ql-mention-list list-group",
+            listItemClass:
+              "ql-mention-list-item list-group-item list-group-item-action p-2",
+          },
+        },
       };
-      modules.clipboard = {
-        matchers: [["span.mention", this.trimMentionBadgeStyle]],
-      };
-      let options = Object.assign({}, quillEditorOptions.discuss);
-      options.modules = modules;
-      return options;
     },
     isEditingMessage() {
       return this.message !== null;
@@ -290,7 +303,8 @@ export default {
           id: cardIndex,
           value: card.getAttribute("name"),
           href: encodeURI(
-            "https://localhost:8080/v2" +
+            location.origin +
+              process.env.BASE_URL.slice(0, -1) +
               this.$route.path +
               "#" +
               card.getAttribute("name")
@@ -351,7 +365,7 @@ export default {
             this.isActionsHovered = force;
           }, 500);
       } else this.isActionsHovered = !this.isActionsHovered;
-      if (!this.isActionsHovered && (this.isMobile || this.isAppleIOSWebview))
+      if (!this.isActionsHovered && (this.isMobile || this.isAppleIOSWebView))
         this.isActionsHovered = true;
     },
     toggleMembersSelection() {
@@ -394,7 +408,8 @@ export default {
         this.mention("card", {
           value: payload.content.name,
           href: encodeURI(
-            "https://localhost:8080/v2" +
+            location.origin +
+              process.env.BASE_URL.slice(0, -1) +
               this.$route.path +
               "#" +
               payload.content.name
@@ -430,9 +445,11 @@ export default {
         );
         mentionNode.parentNode.removeChild(mentionNode);
       });
+
+      let re = "^" + location.href + process.env.BASE_URL + ".*#";
       mentionNodes = Array.from(
         contentNode.getElementsByTagName("a")
-      ).filter((i) => i.href.match(/https:\/\/localhost:8080\/v2\/.*#.*/));
+      ).filter((i) => i.href.match(new Regex(re)));
       mentionNodes.forEach((mentionNode, mentionNodeIndex) => {
         const mentionCardName = decodeURI(mentionNode.href).split("#")[1];
         mentionNode.innerHTML =
@@ -523,7 +540,7 @@ export default {
     },
   },
   async mounted() {
-    if (this.isMobile || this.isAppleIOSWebview) {
+    if (this.isMobile || this.isAppleIOSWebView) {
       this.isActionsHovered = true;
     }
 

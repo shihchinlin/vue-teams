@@ -105,7 +105,7 @@
       <i class="fa fa-expand"></i>
     </b-button>
   </div>
-  <UndiscussableMediaType v-else-if="!isLoaded" />
+  <UnsupportedMediaType v-else-if="!isLoaded" />
 </template>
 
 <script>
@@ -116,7 +116,7 @@ import GatewayTimeout from "@/components/errors/GatewayTimeout";
 import InternalServerError from "@/components/errors/InternalServerError";
 import ServiceUnavailable from "@/components/errors/ServiceUnavailable";
 import Unauthorized from "@/components/errors/Unauthorized";
-import UndiscussableMediaType from "@/components/errors/UndiscussableMediaType";
+import UnsupportedMediaType from "@/components/errors/UnsupportedMediaType";
 import Channel from "@/components/microsoft/teams/Channel";
 import MessageEditor from "@/components/microsoft/teams/MessageEditor";
 import Spinner from "@/components/Spinner";
@@ -129,7 +129,7 @@ export default {
     InternalServerError,
     ServiceUnavailable,
     Unauthorized,
-    UndiscussableMediaType,
+    UnsupportedMediaType,
     Channel,
     MessageEditor,
     Spinner,
@@ -148,6 +148,17 @@ export default {
       showingMessageEditorInModal: false,
       isLoaded: true,
     };
+  },
+  computed: {
+    config() {
+      return JSON.stringify({
+        tenantId: this.tenantId,
+        clientId: this.clientId,
+        redirectUri: this.redirectUri,
+        teamId: this.teamId,
+        channelId: this.channelId,
+      });
+    },
   },
   methods: {
     async loadChannel() {
@@ -194,7 +205,7 @@ export default {
     this.loadChannel();
   },
   watch: {
-    "$route.path": function() {
+    config: function() {
       this.loadChannel();
     },
   },

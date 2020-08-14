@@ -61,10 +61,13 @@ export default {
     return {
       tenantId: "",
       clientId: "",
-      redirectUri: "",
+      redirectUri: location.origin + process.env.BASE_URL.slice(0, -1),
       teamId: "",
       channelId: "",
     };
+  },
+  mounted() {
+    console.log();
   },
 };
 </script>
@@ -78,7 +81,7 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 @import "assets/scss/style";
 
 .app {
-  width: 100%;
+  width: 98vw;
   max-width: 960px;
   height: 100vh;
   margin-right: auto;
@@ -99,18 +102,19 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
     > img {
       display: block;
       margin-top: 3rem;
+      margin-bottom: 3rem;
       margin-right: auto;
       margin-left: auto;
     }
 
     > .input-group {
       width: 75%;
-      margin-top: 3rem;
+      margin-top: 1.5rem;
       margin-right: auto;
       margin-left: auto;
 
       > .input-group-prepend > .input-group-text {
-        width: 150px;
+        width: 100px;
         text-align: right;
       }
     }

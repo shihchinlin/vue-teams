@@ -10,19 +10,6 @@
   font-family: inherit !important;
 }
 
-.modal-backdrop {
-  background-color: desaturate($tone, 30%);
-  opacity: 0.85;
-}
-
-.modal-2xl {
-  max-width: 90% !important;
-}
-
-.modal-max {
-  max-width: 100% !important;
-}
-
 $cursors: auto, default, pointer, move, not-allowed, grab;
 @each $cursor in $cursors {
   .cursor-#{$cursor} {

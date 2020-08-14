@@ -210,6 +210,8 @@ export default {
   },
   data: () => {
     return {
+      isMobile: false,
+      isAppleIOSWebView: false,
       replies: [],
       colorVariants: ["info", "primary", "success", "warning", "danger"],
       isMessageHovered: false,
@@ -219,7 +221,6 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("session", ["isMobile", "isAppleIOSWebview"]),
     messageBodyContent() {
       const contentNode = document.createElement("div");
       contentNode.innerHTML = this.message.body.content;
@@ -343,11 +344,12 @@ export default {
           }
         );
 
+        let re = "^" + location.href + process.env.BASE_URL + ".*#";
         Array.from(this.$refs["content"].getElementsByTagName("a"))
-          .filter((i) => i.href.match(/^https:\/\/localhost:8080\/v2\/.*#.*/))
+          .filter((i) => i.href.match(new RegExp(re + ".*")))
           .map((i) => {
             let card_name = decodeURIComponent(
-              i.href.replace(/^https:\/\/localhost:8080\/v2\/.*#/, "")
+              i.href.replace(new RegExp(re), "")
             );
             i.title = card_name;
             i.innerHTML = '<i class="fa fa-chart-bar"></i> ' + card_name;
@@ -361,7 +363,8 @@ export default {
               this.mention("card", {
                 value: card_name,
                 href: encodeURI(
-                  "https://localhost:8080/v2" +
+                  location.origin +
+                    process.env.BASE_URL +
                     this.$route.path +
                     "#" +
                     card_name
@@ -373,7 +376,7 @@ export default {
               this.focusCard(card_name);
             });
             i.addEventListener("mouseleave", () => {
-              if (!this.isMobile && !this.isAppleIOSWebview) this.blurCards();
+              if (!this.isMobile && !this.isAppleIOSWebView) this.blurCards();
             });
           });
 
@@ -402,7 +405,7 @@ export default {
                 i.src = URL.createObjectURL(img);
               })
               .catch(() => {
-                i.src = "/v2/img/image.svg";
+                i.src = process.env.BASE_URL.slice(0, -1) + "/img/image.svg";
                 i.removeAttribute("style");
               });
           });
