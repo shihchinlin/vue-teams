@@ -23,26 +23,26 @@
       </div>
       <div role="group" class="input-group">
         <div class="input-group-prepend">
-          <div class="input-group-text">REDIRECT_URI</div>
+          <div class="input-group-text">redirectUri</div>
         </div>
         <b-form-input
           v-model="redirectUri"
-          placeholder="Enter your REDIRECT_URI"
+          placeholder="Enter your redirectUri"
         >
         </b-form-input>
       </div>
       <div role="group" class="input-group">
         <div class="input-group-prepend">
-          <div class="input-group-text">TEAM_ID</div>
+          <div class="input-group-text">teamId</div>
         </div>
-        <b-form-input v-model="teamId" placeholder="Enter your TEAM_ID">
+        <b-form-input v-model="teamId" placeholder="Enter your teamId">
         </b-form-input>
       </div>
       <div role="group" class="input-group">
         <div class="input-group-prepend">
-          <div class="input-group-text">CAHNNEL_ID</div>
+          <div class="input-group-text">channelId</div>
         </div>
-        <b-form-input v-model="channelId" placeholder="Enter your CAHNNEL_ID">
+        <b-form-input v-model="channelId" placeholder="Enter your channelId">
         </b-form-input>
       </div>
     </form>

@@ -6,7 +6,7 @@
       'animated',
       'fadeIn',
       'rounded',
-      is_message_hovered ? 'hovered' : '',
+      isMessageHovered ? 'hovered' : '',
     ]"
     @mouseover="handleMouseOver"
     @mouseleave="handleMouseLeave"
@@ -15,34 +15,32 @@
       :class="[
         'bg-light',
         'rounded-top',
-        is_replying || (is_in_channel && is_message_hovered)
-          ? ''
-          : 'rounded-bottom',
+        isReplying || (isInChannel && isMessageHovered) ? '' : 'rounded-bottom',
         'p-1',
         'border-left',
         message.from.user.id === $store.state.microsoft.me.id
-          ? 'border-' + color_variant
+          ? 'border-' + colorVariant
           : '',
       ]"
-      v-if="!is_deleted"
+      v-if="!isDeleted"
     >
       <div class="d-flex align-items-center mb-2 position-relative">
         <b-avatar
           class="d-flex mr-2"
-          :variant="color_variant"
+          :variant="colorVariant"
           button
           badge
           :badge-variant="
             $store.state.microsoft.presences[message.from.user.id]
               ? $store.state.microsoft.presences[message.from.user.id]
-                  .color_variant
+                  .colorVariant
               : 'secondary'
           "
           :text="formatNameInitials(message.from.user.displayName)"
           @click="
             mention('member', {
               value: message.from.user.displayName,
-              mentioned_user_id: message.from.user.id,
+              mentionedUserId: message.from.user.id,
             })
           "
         ></b-avatar>
@@ -52,7 +50,7 @@
             @click="
               mention('member', {
                 value: message.from.user.displayName,
-                mentioned_user_id: message.from.user.id,
+                mentionedUserId: message.from.user.id,
               })
             "
           >
@@ -65,7 +63,7 @@
         <b-button-group
           size="sm"
           class="actions position-absolute"
-          v-if="is_message_hovered"
+          v-if="isMessageHovered"
         >
           <b-button
             class="text-dark"
@@ -73,28 +71,28 @@
             pill
             v-if="
               message.from.user.id === $store.state.microsoft.me.id &&
-                !is_delete_confirmed &&
-                !is_editing
+                !isDeleteConfirmed &&
+                !isEditing
             "
-            @click="is_editing = true"
+            @click="isEditing = true"
           >
             <i class="fa fa-edit" />
           </b-button>
           <b-button
-            :class="is_delete_confirmed ? 'text-danger' : 'text-dark'"
+            :class="isDeleteConfirmed ? 'text-danger' : 'text-dark'"
             variant="transparent"
             pill
             v-if="message.from.user.id === $store.state.microsoft.me.id"
             @click="deleteMessage()"
-            @blur="is_delete_confirmed = false"
+            @blur="isDeleteConfirmed = false"
           >
             <i
               :class="[
                 'fa',
-                is_delete_confirmed ? 'fa-question-circle' : 'fa-trash-alt',
+                isDeleteConfirmed ? 'fa-question-circle' : 'fa-trash-alt',
               ]"
             />
-            {{ is_delete_confirmed ? "確認刪除" : "" }}
+            {{ isDeleteConfirmed ? "確認刪除" : "" }}
           </b-button>
         </b-button-group>
       </div>
@@ -102,20 +100,20 @@
         <div
           ref="content"
           class="content overflow-hidden"
-          v-html="message_body_content"
-          v-if="!is_editing"
+          v-html="messageBodyContent"
+          v-if="!isEditing"
         ></div>
         <MessageEditor
           class="content border-0"
           :teamId="teamId"
           :channelId="channelId"
-          :message_id="message.id"
+          :messageId="message.id"
           :message="message"
           v-else
           @reset="handleEditorReset"
         />
         <!-- <pre>{{ message }}</pre> -->
-        <div class="replies" v-if="is_in_channel">
+        <div class="replies" v-if="isInChannel">
           <Message
             class="reply my-2"
             :teamId="teamId"
@@ -134,11 +132,11 @@
       :class="[
         'bg-light',
         'rounded-top',
-        is_replying ? '' : 'rounded-bottom',
+        isReplying ? '' : 'rounded-bottom',
         'p-1',
         'border-left',
       ]"
-      v-else-if="is_recoverable"
+      v-else-if="isRecoverable"
     >
       <div class="d-flex align-items-center mb-1">
         <b-avatar class="d-flex mr-2" variant="secondary" text="刪"></b-avatar>
@@ -148,7 +146,7 @@
           </div>
         </div>
       </div>
-      <div class="replies" v-if="is_in_channel">
+      <div class="replies" v-if="isInChannel">
         <Message
           class="reply my-2"
           :teamId="teamId"
@@ -163,29 +161,23 @@
     <div
       class="w-100 cursor-pointer text-muted"
       v-if="
-        is_in_channel &&
-          (!is_deleted || is_recoverable) &&
-          !isMobile &&
-          !is_replying
+        isInChannel && (!isDeleted || isRecoverable) && !isMobile && !isReplying
       "
-      @click="is_replying = true"
+      @click="isReplying = true"
     >
       <i class="fa fa-reply" /> 回覆
     </div>
     <MessageEditor
       ref="reply_editor"
-      :class="['reply', 'rounded-bottom', 'border-' + color_variant_me]"
+      :class="['reply', 'rounded-bottom', 'border-' + colorVariantMe]"
       :teamId="teamId"
       :channelId="channelId"
-      :message_id="message.id"
+      :messageId="message.id"
       v-if="
-        is_in_channel &&
-          (!is_deleted || is_recoverable) &&
-          !isMobile &&
-          is_replying
+        isInChannel && (!isDeleted || isRecoverable) && !isMobile && isReplying
       "
       @replied="handleReplyCreated"
-      @reset="is_replying = false"
+      @reset="isReplying = false"
     />
   </div>
 </template>
@@ -219,19 +211,19 @@ export default {
   data: () => {
     return {
       replies: [],
-      color_variants: ["info", "primary", "success", "warning", "danger"],
-      is_message_hovered: false,
-      is_delete_confirmed: false,
-      is_editing: false,
-      is_replying: false,
+      colorVariants: ["info", "primary", "success", "warning", "danger"],
+      isMessageHovered: false,
+      isDeleteConfirmed: false,
+      isEditing: false,
+      isReplying: false,
     };
   },
   computed: {
-    ...mapGetters("session", ["isMobile", "is_apple_ios_webview"]),
-    message_body_content() {
-      const content_node = document.createElement("div");
-      content_node.innerHTML = this.message.body.content;
-      Array.from(content_node.getElementsByTagName("img"))
+    ...mapGetters("session", ["isMobile", "isAppleIOSWebview"]),
+    messageBodyContent() {
+      const contentNode = document.createElement("div");
+      contentNode.innerHTML = this.message.body.content;
+      Array.from(contentNode.getElementsByTagName("img"))
         .filter((i) =>
           i.src.match(
             /^https:\/\/graph.microsoft.com\/beta\/teams\/.*\/channels\/.*\/messages\/.*\/hostedContents\/.*\/\$value$/
@@ -242,17 +234,17 @@ export default {
           i.removeAttribute("src");
         });
 
-      return content_node.innerHTML;
+      return contentNode.innerHTML;
     },
-    is_in_channel() {
+    isInChannel() {
       return this.$parent.$options.name === "Channel";
     },
-    is_deleted() {
+    isDeleted() {
       return this.message.deletedDateTime;
     },
-    is_recoverable() {
+    isRecoverable() {
       return (
-        this.is_deleted &&
+        this.isDeleted &&
         (new Date(this.message.deletedDateTime) > new Date() - 3600000 ||
           this.replies.filter((i) => {
             return (
@@ -262,18 +254,18 @@ export default {
           }).length)
       );
     },
-    color_variant() {
-      return this.color_variants[
+    colorVariant() {
+      return this.colorVariants[
         Object.keys(this.$store.state.microsoft.presences).indexOf(
           this.message.from.user.id
-        ) % this.color_variants.length
+        ) % this.colorVariants.length
       ];
     },
-    color_variant_me() {
-      return this.color_variants[
+    colorVariantMe() {
+      return this.colorVariants[
         Object.keys(this.$store.state.microsoft.presences).indexOf(
           this.$store.state.microsoft.me.id
-        ) % this.color_variants.length
+        ) % this.colorVariants.length
       ];
     },
   },
@@ -308,8 +300,8 @@ export default {
       });
     },
     mention(type, mention) {
-      if (this.is_in_channel) {
-        this.is_replying = true;
+      if (this.isInChannel) {
+        this.isReplying = true;
         this.$nextTick(() => {
           if (this.$refs["reply_editor"])
             this.$refs["reply_editor"].mention(type, mention);
@@ -318,15 +310,15 @@ export default {
       } else this.$emit("mentioned", { type: type, mention: mention });
     },
     deleteMessage() {
-      if (this.is_delete_confirmed) {
+      if (this.isDeleteConfirmed) {
         this.toastMessage(
           "尚未支援刪除討論訊息",
           "Microsoft Graph API目前尚不支援編輯Microsoft Teams訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行刪除。",
           "warning"
         );
-        this.is_delete_confirmed = false;
+        this.isDeleteConfirmed = false;
       } else {
-        this.is_delete_confirmed = true;
+        this.isDeleteConfirmed = true;
       }
     },
     formatMentions() {
@@ -345,7 +337,7 @@ export default {
             i.addEventListener("click", () => {
               this.mention("member", {
                 value: member_name,
-                mentioned_user_id: menber_id,
+                mentionedUserId: menber_id,
               });
             });
           }
@@ -381,8 +373,7 @@ export default {
               this.focusCard(card_name);
             });
             i.addEventListener("mouseleave", () => {
-              if (!this.isMobile && !this.is_apple_ios_webview)
-                this.blurCards();
+              if (!this.isMobile && !this.isAppleIOSWebview) this.blurCards();
             });
           });
 
@@ -418,7 +409,7 @@ export default {
       }
     },
     handleEditorReset() {
-      this.is_editing = false;
+      this.isEditing = false;
       this.$nextTick(this.formatMentions);
     },
     handleReplyCreated(event) {
@@ -436,18 +427,18 @@ export default {
     },
     handleMouseOver(event) {
       event.stopPropagation();
-      this.is_message_hovered = true;
-      if (!this.is_in_channel && this.$parent.is_message_hovered)
-        this.$parent.is_message_hovered = false;
-      if (this.is_in_channel) this.loadRepliesThrottled();
+      this.isMessageHovered = true;
+      if (!this.isInChannel && this.$parent.isMessageHovered)
+        this.$parent.isMessageHovered = false;
+      if (this.isInChannel) this.loadRepliesThrottled();
       else this.$emit("refresh-replies");
     },
     handleMouseLeave(event) {
-      this.is_message_hovered = false;
+      this.isMessageHovered = false;
     },
   },
   mounted() {
-    if (this.is_in_channel)
+    if (this.isInChannel)
       this.loadReplies().then(() => {
         this.$emit("loaded");
       });

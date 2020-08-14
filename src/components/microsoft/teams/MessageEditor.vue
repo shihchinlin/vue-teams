@@ -4,7 +4,7 @@
       'message-editor',
       'position-relative',
       'mask-wrapper',
-      $store.state.card.is_dragging ? 'droppable' : '',
+      $store.state.card.isDragging ? 'droppable' : '',
     ]"
     @dragover.prevent=""
     @drop="handleCardDrop"
@@ -13,7 +13,7 @@
     <VueQuillEditor
       ref="editor"
       v-model="body.content"
-      :options="quilleditor_options"
+      :options="quillEditorOptions"
       @blur="handleEditorBlur"
     >
     </VueQuillEditor>
@@ -25,11 +25,11 @@
     >
       <b-button
         :class="
-          is_actions_hovered || is_card_mentioned || is_mentioning_card
+          isActionsHovered || isCardMentioned || isMentioningCard
             ? 'mx-1'
             : 'position-absolute invisible'
         "
-        :variant="is_card_mentioned || is_mentioning_card ? 'danger' : 'white'"
+        :variant="isCardMentioned || isMentioningCard ? 'danger' : 'white'"
         pill
         v-b-tooltip.hover="'標註報表'"
         @click="toggleCardsSelection()"
@@ -38,17 +38,15 @@
       </b-button>
       <b-button
         :class="
-          is_actions_hovered ||
-          is_member_mentioned ||
-          is_mentioning_member ||
-          is_card_mentioned ||
-          is_mentioning_card
+          isActionsHovered ||
+          isMemberMentioned ||
+          isMentioningMember ||
+          isCardMentioned ||
+          isMentioningCard
             ? 'mx-1'
             : 'position-absolute invisible'
         "
-        :variant="
-          is_member_mentioned || is_mentioning_member ? 'danger' : 'white'
-        "
+        :variant="isMemberMentioned || isMentioningMember ? 'danger' : 'white'"
         pill
         v-b-tooltip.hover="'標註使用者'"
         @click="toggleMembersSelection()"
@@ -57,11 +55,11 @@
       </b-button>
       <b-button
         :class="
-          is_actions_hovered ||
-          is_member_mentioned ||
-          is_mentioning_member ||
-          is_card_mentioned ||
-          is_mentioning_card ||
+          isActionsHovered ||
+          isMemberMentioned ||
+          isMentioningMember ||
+          isCardMentioned ||
+          isMentioningCard ||
           body.content
             ? 'mx-1'
             : 'position-absolute invisible'
@@ -78,12 +76,12 @@
         class="mx-1"
         variant="success"
         pill
-        v-b-tooltip.hover="is_editing_message ? '完成' : '傳送'"
+        v-b-tooltip.hover="isEditingMessage ? '完成' : '傳送'"
         @click="sendMessage()"
         :disabled="body.content === ''"
       >
         <i
-          :class="['fa', is_editing_message ? 'fa-check' : 'fa-paper-plane']"
+          :class="['fa', isEditingMessage ? 'fa-check' : 'fa-paper-plane']"
         ></i>
       </b-button>
     </b-button-group>
@@ -103,7 +101,7 @@ import {
   replyToMessage,
   listChannelMembers,
 } from "@/api/microsoft";
-import quilleditor_options from "@/assets/json/quilleditor-options";
+import quillEditorOptions from "@/assets/json/quilleditor-options";
 import "quill/dist/quill.core.css";
 import "quill/dist/quill.snow.css";
 import "quill/dist/quill.bubble.css";
@@ -117,16 +115,16 @@ export default {
   props: {
     teamId: { type: String, required: true },
     channelId: { type: String, required: true },
-    message_id: { type: String, default: null },
+    messageId: { type: String, default: null },
     message: { type: Object, default: null },
   },
   data: function() {
     return {
-      is_actions_hovered: false,
-      is_mentioning_member: false,
-      is_member_mentioned: false,
-      is_card_mentioned: false,
-      color_variants: ["info", "primary", "success", "warning", "danger"],
+      isActionsHovered: false,
+      isMentioningMember: false,
+      isMemberMentioned: false,
+      isCardMentioned: false,
+      colorVariants: ["info", "primary", "success", "warning", "danger"],
       members: null,
       body: {
         content: "",
@@ -135,10 +133,10 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("session", ["isMobile", "is_apple_ios_webview"]),
-    ...mapGetters({ is_mentioning_card: "card/is_selectable" }),
-    quilleditor_options() {
-      let modules = Object.assign({}, quilleditor_options.discuss.modules);
+    ...mapGetters("session", ["isMobile", "isAppleIOSWebview"]),
+    ...mapGetters({ isMentioningCard: "card/is_selectable" }),
+    quillEditorOptions() {
+      let modules = Object.assign({}, quillEditorOptions.discuss.modules);
       modules.mention = {
         source: this.showMentionSuggestions,
         renderItem: this.renderMentionSuggestion,
@@ -149,7 +147,7 @@ export default {
           "id",
           "value",
           "denotationChar",
-          "mentioned_user_id",
+          "mentionedUserId",
           "href",
         ],
         onSelect: this.handleMentionSuggestionSelected,
@@ -161,14 +159,14 @@ export default {
       modules.clipboard = {
         matchers: [["span.mention", this.trimMentionBadgeStyle]],
       };
-      let options = Object.assign({}, quilleditor_options.discuss);
+      let options = Object.assign({}, quillEditorOptions.discuss);
       options.modules = modules;
       return options;
     },
-    is_editing_message() {
+    isEditingMessage() {
       return this.message !== null;
     },
-    message_draft() {
+    messageDraft() {
       return {
         body: {
           contentType: "html",
@@ -206,21 +204,20 @@ export default {
         );
       }
     },
-    showMentionSuggestions: async function(keyword, renderList, mention_char) {
+    showMentionSuggestions: async function(keyword, renderList, mentionChar) {
       let suggestions = [];
-      if (mention_char === "@")
-        suggestions = await this.suggestMembers(keyword);
-      if (mention_char === "#") suggestions = this.suggestCards(keyword);
+      if (mentionChar === "@") suggestions = await this.suggestMembers(keyword);
+      if (mentionChar === "#") suggestions = this.suggestCards(keyword);
       renderList(suggestions);
     },
     renderMentionSuggestion(item) {
-      if (item.mentioned_user_id) {
+      if (item.mentionedUserId) {
         return (
           '<div class="d-flex align-items-center"><span class="b-avatar mr-2 badge-' +
-          this.color_variants[
+          this.colorVariants[
             Object.keys(this.$store.state.microsoft.presences).indexOf(
-              item.mentioned_user_id
-            ) % this.color_variants.length
+              item.mentionedUserId
+            ) % this.colorVariants.length
           ] +
           ' rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span>' +
           this.formatNameInitials(item.value) +
@@ -244,7 +241,7 @@ export default {
     },
     handleMentionSuggestionSelected(item, insertItem) {
       this._toggleCardsSelection(false);
-      this.is_mentioning_member = false;
+      this.isMentioningMember = false;
       insertItem(item);
     },
     async suggestMembers(keyword) {
@@ -276,11 +273,11 @@ export default {
               member.email.includes(keyword)) &&
             member.userId !== this.$store.state.microsoft.me.id
         )
-        .map((member, member_index) => {
+        .map((member, memberIndex) => {
           return {
-            id: member_index,
+            id: memberIndex,
             value: member.displayName,
-            mentioned_user_id: member.userId,
+            mentionedUserId: member.userId,
             email: member.email,
           };
         });
@@ -288,9 +285,9 @@ export default {
     suggestCards(keyword) {
       const cards = Array.from(
         document.querySelectorAll(".card-wrapper .card")
-      ).map((card, card_index) => {
+      ).map((card, cardIndex) => {
         return {
-          id: card_index,
+          id: cardIndex,
           value: card.getAttribute("name"),
           href: encodeURI(
             "https://localhost:8080/v2" +
@@ -313,11 +310,11 @@ export default {
                 "warning"
               );
             } else {
-              let api = this.message_id
+              let api = this.messageId
                 ? replyToMessage(
                     this.teamId,
                     this.channelId,
-                    this.message_id,
+                    this.messageId,
                     this.transformMessageFromQuillToGraph(
                       this.body.content,
                       this.mentions
@@ -343,25 +340,22 @@ export default {
     cancelMessageEdit() {
       this.body.content = "";
       this.opened = false;
-      if (this.is_mentioning_card) this._toggleCardsSelection(false);
+      if (this.isMentioningCard) this._toggleCardsSelection(false);
       this.$emit("reset");
     },
     toggleActions(force = null) {
       if (force !== null) {
-        if (force) this.is_actions_hovered = force;
+        if (force) this.isActionsHovered = force;
         else
           setTimeout(() => {
-            this.is_actions_hovered = force;
+            this.isActionsHovered = force;
           }, 500);
-      } else this.is_actions_hovered = !this.is_actions_hovered;
-      if (
-        !this.is_actions_hovered &&
-        (this.isMobile || this.is_apple_ios_webview)
-      )
-        this.is_actions_hovered = true;
+      } else this.isActionsHovered = !this.isActionsHovered;
+      if (!this.isActionsHovered && (this.isMobile || this.isAppleIOSWebview))
+        this.isActionsHovered = true;
     },
     toggleMembersSelection() {
-      if (!this.is_mentioning_member) {
+      if (!this.isMentioningMember) {
         this.$refs["editor"].quill.insertText(
           this.$refs["editor"].quill.getSelection(true).index,
           "@"
@@ -375,10 +369,10 @@ export default {
         );
         this.$refs["editor"].quill.getModule("mention").hideMentionList();
       }
-      this.is_mentioning_member = !this.is_mentioning_member;
+      this.isMentioningMember = !this.isMentioningMember;
     },
     toggleCardsSelection() {
-      if (!this.is_mentioning_card) {
+      if (!this.isMentioningCard) {
         this.$refs["editor"].quill.insertText(
           this.$refs["editor"].quill.getSelection(true).index,
           "#"
@@ -406,7 +400,7 @@ export default {
               payload.content.name
           ),
         });
-      this.$store.state.card.is_dragging = false;
+      this.$store.state.card.isDragging = false;
       this._toggleCardsSelection();
     },
     handleEditorBlur(event) {
@@ -417,104 +411,103 @@ export default {
         this.cancelMessageEdit();
     },
     async transformMessageFromGraphToQuill(message) {
-      const content_node = document.createElement("div");
-      content_node.innerHTML = message.body.content;
-      let mention_nodes = Array.from(content_node.getElementsByTagName("at"));
-      mention_nodes.forEach((mention_node, mention_node_index) => {
-        const mention_user = message.mentions[mention_node.id].mentioned.user;
-        mention_node.innerHTML =
+      const contentNode = document.createElement("div");
+      contentNode.innerHTML = message.body.content;
+      let mentionNodes = Array.from(contentNode.getElementsByTagName("at"));
+      mentionNodes.forEach((mentionNode, mentionNodeIndex) => {
+        const mentionUser = message.mentions[mentionNode.id].mentioned.user;
+        mentionNode.innerHTML =
           '<span class="mention" data-index="0" data-denotation-char="@" data-id="0" data-value="' +
-          mention_user.displayName +
-          '" data-mentioned_user_id="' +
-          mention_user.id +
+          mentionUser.displayName +
+          '" data-mentionedUserId="' +
+          mentionUser.id +
           '">﻿<span contenteditable="true"><span class="ql-mention-denotation-char">@</span>' +
-          mention_user.displayName +
+          mentionUser.displayName +
           "</span>﻿</span>";
-        mention_node.parentNode.insertBefore(
-          mention_node.firstChild,
-          mention_node
+        mentionNode.parentNode.insertBefore(
+          mentionNode.firstChild,
+          mentionNode
         );
-        mention_node.parentNode.removeChild(mention_node);
+        mentionNode.parentNode.removeChild(mentionNode);
       });
-      mention_nodes = Array.from(
-        content_node.getElementsByTagName("a")
+      mentionNodes = Array.from(
+        contentNode.getElementsByTagName("a")
       ).filter((i) => i.href.match(/https:\/\/localhost:8080\/v2\/.*#.*/));
-      mention_nodes.forEach((mention_node, mention_node_index) => {
-        const mention_card_name = decodeURI(mention_node.href).split("#")[1];
-        mention_node.innerHTML =
+      mentionNodes.forEach((mentionNode, mentionNodeIndex) => {
+        const mentionCardName = decodeURI(mentionNode.href).split("#")[1];
+        mentionNode.innerHTML =
           '<span class="mention" data-index="0" data-denotation-char="#" data-id="0" data-value="' +
-          mention_card_name +
+          mentionCardName +
           '" data-href="' +
-          mention_node.href +
+          mentionNode.href +
           '">﻿<span contenteditable="false"><span class="ql-mention-denotation-char">#</span>' +
-          mention_card_name +
+          mentionCardName +
           "</span>﻿</span>";
 
-        mention_node.parentNode.insertBefore(
-          mention_node.firstChild,
-          mention_node
+        mentionNode.parentNode.insertBefore(
+          mentionNode.firstChild,
+          mentionNode
         );
-        mention_node.parentNode.removeChild(mention_node);
+        mentionNode.parentNode.removeChild(mentionNode);
       });
-      return content_node.innerHTML;
+      return contentNode.innerHTML;
     },
     transformMessageFromQuillToGraph(content) {
       let mentions = [];
-      let content_node = document.createElement("div");
-      content_node.innerHTML = content;
-      let mention_nodes = Array.from(
-        content_node.getElementsByClassName("mention")
+      let contentNode = document.createElement("div");
+      contentNode.innerHTML = content;
+      let mentionNodes = Array.from(
+        contentNode.getElementsByClassName("mention")
       );
-      mention_nodes.forEach((mention_node) => {
-        let denotation_char = mention_node.getAttribute("data-denotation-char");
-        if (denotation_char === "@") {
-          let mentions_lookup = mentions.filter(
+      mentionNodes.forEach((mentionNode) => {
+        let denotationChar = mentionNode.getAttribute("data-denotation-char");
+        if (denotationChar === "@") {
+          let mentionsLookup = mentions.filter(
             (i) =>
               i.mentioned.user.id ===
-              mention_node.getAttribute("data-mentioned_user_id")
+              mentionNode.getAttribute("data-mentionedUserId")
           );
-          let mentions_index = -1;
-          if (mentions_lookup.length > 0)
-            mentions_index = mentions_lookup[0].id;
+          let mentionsIndex = -1;
+          if (mentionsLookup.length > 0) mentionsIndex = mentionsLookup[0].id;
           else {
-            mentions_index = mentions.length;
+            mentionsIndex = mentions.length;
             mentions.push({
               id: mentions.length,
-              mentionText: mention_node.getAttribute("data-value"),
+              mentionText: mentionNode.getAttribute("data-value"),
               mentioned: {
                 user: {
-                  displayName: mention_node.getAttribute("data-value"),
-                  id: mention_node.getAttribute("data-mentioned_user_id"),
+                  displayName: mentionNode.getAttribute("data-value"),
+                  id: mentionNode.getAttribute("data-mentionedUserId"),
                   userIdentityType: "aadUser",
                 },
               },
             });
           }
-          mention_node.innerHTML =
+          mentionNode.innerHTML =
             '<at id="' +
-            mentions_index +
+            mentionsIndex +
             '">' +
-            mention_node.getAttribute("data-value") +
+            mentionNode.getAttribute("data-value") +
             "</at>";
         }
-        if (denotation_char === "#") {
-          mention_node.innerHTML =
+        if (denotationChar === "#") {
+          mentionNode.innerHTML =
             '<a href="' +
-            mention_node.getAttribute("data-href") +
+            mentionNode.getAttribute("data-href") +
             '" target="_blank">' +
-            mention_node.getAttribute("data-value") +
+            mentionNode.getAttribute("data-value") +
             "</a>";
         }
-        mention_node.parentNode.insertBefore(
-          mention_node.firstChild,
-          mention_node
+        mentionNode.parentNode.insertBefore(
+          mentionNode.firstChild,
+          mentionNode
         );
-        mention_node.parentNode.removeChild(mention_node);
+        mentionNode.parentNode.removeChild(mentionNode);
       });
       return {
         body: {
           contentType: "html",
-          content: content_node.innerHTML,
+          content: contentNode.innerHTML,
         },
         mentions: mentions,
       };
@@ -530,8 +523,8 @@ export default {
     },
   },
   async mounted() {
-    if (this.isMobile || this.is_apple_ios_webview) {
-      this.is_actions_hovered = true;
+    if (this.isMobile || this.isAppleIOSWebview) {
+      this.isActionsHovered = true;
     }
 
     if (this.message)
@@ -543,12 +536,12 @@ export default {
   watch: {
     body: {
       handler() {
-        this.is_member_mentioned =
+        this.isMemberMentioned =
           this.body.content.indexOf('data-denotation-char="@"') >= 0;
-        this.is_card_mentioned =
+        this.isCardMentioned =
           this.body.content.indexOf('data-denotation-char="#"') >= 0;
 
-        this.is_mentioning_member = this.body.content
+        this.isMentioningMember = this.body.content
           .replace(/<\/?[^>]+(>|$)/g, "")
           .endsWith("@");
         this._toggleCardsSelection(

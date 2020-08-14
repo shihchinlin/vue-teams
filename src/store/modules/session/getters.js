@@ -1,5 +1,5 @@
 export default {
-  is_apple_ios_webview: (state) => {
+  isAppleIOSWebview: (state) => {
     return false;
   },
   isMobile: (state) => {

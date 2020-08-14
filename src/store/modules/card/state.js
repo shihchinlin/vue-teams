@@ -1,6 +1,6 @@
 export default {
   capabilities: {
-    selectable: false
+    selectable: false,
   },
-  is_dragging: false
+  isDragging: false,
 };
