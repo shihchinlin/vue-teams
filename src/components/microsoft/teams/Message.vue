@@ -6,7 +6,7 @@
       'animated',
       'fadeIn',
       'rounded',
-      isMessageHovered ? 'hovered' : '',
+      isMessageHovered ? 'hovered' : ''
     ]"
     @mouseover="handleMouseOver"
     @mouseleave="handleMouseLeave"
@@ -20,7 +20,7 @@
         'border-left',
         message.from.user.id === $store.state.microsoft.me.id
           ? 'border-' + colorVariant
-          : '',
+          : ''
       ]"
       v-if="!isDeleted"
     >
@@ -40,7 +40,7 @@
           @click="
             mention('member', {
               value: message.from.user.displayName,
-              mentionedUserId: message.from.user.id,
+              mentionedUserId: message.from.user.id
             })
           "
         ></b-avatar>
@@ -50,7 +50,7 @@
             @click="
               mention('member', {
                 value: message.from.user.displayName,
-                mentionedUserId: message.from.user.id,
+                mentionedUserId: message.from.user.id
               })
             "
           >
@@ -89,7 +89,7 @@
             <i
               :class="[
                 'fa',
-                isDeleteConfirmed ? 'fa-question-circle' : 'fa-trash-alt',
+                isDeleteConfirmed ? 'fa-question-circle' : 'fa-trash-alt'
               ]"
             />
             {{ isDeleteConfirmed ? "確認刪除" : "" }}
@@ -134,7 +134,7 @@
         'rounded-top',
         isReplying ? '' : 'rounded-bottom',
         'p-1',
-        'border-left',
+        'border-left'
       ]"
       v-else-if="isRecoverable"
     >
@@ -186,28 +186,31 @@
 import _ from "lodash";
 import { mapGetters } from "vuex";
 
-import mixin from "../../../mixins/Format";
 import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
+import {
+  formatDateTimeFromNow,
+  formatNameInitials,
+  toastMessage
+} from "../../../utils/utils";
 import {
   listMessageReplies,
   refreshPresences,
-  getHostedContent,
+  getHostedContent
 } from "../../../api/microsoft";
 import MessageEditor from "./MessageEditor";
 
 export default {
   name: "Message",
-  mixins: [mixin],
   components: {
-    MessageEditor,
+    MessageEditor
   },
   props: {
     teamId: { type: String, required: true },
     channelId: { type: String, required: true },
     message: {
       type: Object,
-      required: true,
-    },
+      required: true
+    }
   },
   data: () => {
     return {
@@ -218,7 +221,7 @@ export default {
       isMessageHovered: false,
       isDeleteConfirmed: false,
       isEditing: false,
-      isReplying: false,
+      isReplying: false
     };
   },
   computed: {
@@ -226,12 +229,12 @@ export default {
       const contentNode = document.createElement("div");
       contentNode.innerHTML = this.message.body.content;
       Array.from(contentNode.getElementsByTagName("img"))
-        .filter((i) =>
+        .filter(i =>
           i.src.match(
             /^https:\/\/graph.microsoft.com\/beta\/teams\/.*\/channels\/.*\/messages\/.*\/hostedContents\/.*\/\$value$/
           )
         )
-        .map((i) => {
+        .map(i => {
           i.setAttribute("target-src", i.src);
           i.removeAttribute("src");
         });
@@ -248,7 +251,7 @@ export default {
       return (
         this.isDeleted &&
         (new Date(this.message.deletedDateTime) > new Date() - 3600000 ||
-          this.replies.filter((i) => {
+          this.replies.filter(i => {
             return (
               i.deletedDateTime &&
               new Date(i.deletedDateTime) > new Date() - 3600000
@@ -269,9 +272,11 @@ export default {
           this.$store.state.microsoft.me.id
         ) % this.colorVariants.length
       ];
-    },
+    }
   },
   methods: {
+    formatDateTimeFromNow,
+    formatNameInitials,
     loadReplies() {
       //[TODO] check channel message is existed
       if (
@@ -281,7 +286,7 @@ export default {
           this.teamId,
           this.channelId,
           this.message.id
-        ).then((replies) => {
+        ).then(replies => {
           this.replies = replies.reverse();
         });
       } else return Promise.reject();
@@ -292,12 +297,12 @@ export default {
     focusCard(card_name) {
       document
         .querySelectorAll(".card-wrapper .card[name='" + card_name + "']")
-        .forEach((i) => {
+        .forEach(i => {
           i.parentNode.classList.add("focused");
         });
     },
     blurCards() {
-      document.querySelectorAll(".card-wrapper").forEach((i) => {
+      document.querySelectorAll(".card-wrapper").forEach(i => {
         i.classList.remove("focused");
       });
     },
@@ -313,7 +318,7 @@ export default {
     },
     deleteMessage() {
       if (this.isDeleteConfirmed) {
-        this.toastMessage(
+        toastMessage(
           "尚未支援刪除討論訊息",
           "Microsoft Graph API目前尚不支援編輯Microsoft Teams訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行刪除。",
           "warning"
@@ -325,30 +330,28 @@ export default {
     },
     formatMentions() {
       if (this.$refs["content"]) {
-        Array.from(this.$refs["content"].getElementsByTagName("at")).map(
-          (i) => {
-            let member_name = i.textContent;
-            let menber_id = this.message.mentions[i.getAttribute("id")]
-              .mentioned.user.id;
-            i.title = member_name;
-            i.innerHTML = '<i class="fa fa-user"></i> ' + member_name;
-            i.classList.add("badge-secondary");
-            i.classList.add("badge-pill");
-            i.classList.add("text-light");
-            i.classList.add("cursor-pointer");
-            i.addEventListener("click", () => {
-              this.mention("member", {
-                value: member_name,
-                mentionedUserId: menber_id,
-              });
+        Array.from(this.$refs["content"].getElementsByTagName("at")).map(i => {
+          let member_name = i.textContent;
+          let menber_id = this.message.mentions[i.getAttribute("id")].mentioned
+            .user.id;
+          i.title = member_name;
+          i.innerHTML = '<i class="fa fa-user"></i> ' + member_name;
+          i.classList.add("badge-secondary");
+          i.classList.add("badge-pill");
+          i.classList.add("text-light");
+          i.classList.add("cursor-pointer");
+          i.addEventListener("click", () => {
+            this.mention("member", {
+              value: member_name,
+              mentionedUserId: menber_id
             });
-          }
-        );
+          });
+        });
 
         let re = "^" + location.href + process.env.BASE_URL + ".*#";
         Array.from(this.$refs["content"].getElementsByTagName("a"))
-          .filter((i) => i.href.match(new RegExp(re + ".*")))
-          .map((i) => {
+          .filter(i => i.href.match(new RegExp(re + ".*")))
+          .map(i => {
             let card_name = decodeURIComponent(
               i.href.replace(new RegExp(re), "")
             );
@@ -369,7 +372,7 @@ export default {
                     this.$route.path +
                     "#" +
                     card_name
-                ),
+                )
               });
             });
             i.addEventListener("mouseenter", () => {
@@ -382,7 +385,7 @@ export default {
           });
 
         Array.from(this.$refs["content"].getElementsByTagName("img"))
-          .filter((i) => {
+          .filter(i => {
             return (
               i.getAttribute("target-src") &&
               i
@@ -392,7 +395,7 @@ export default {
                 )
             );
           })
-          .map((i) => {
+          .map(i => {
             const hosted_content_id = decodeURI(
               i.getAttribute("target-src")
             ).split("/")[11];
@@ -402,7 +405,7 @@ export default {
               this.message.id,
               hosted_content_id
             )
-              .then((img) => {
+              .then(img => {
                 i.src = URL.createObjectURL(img);
               })
               .catch(() => {
@@ -439,7 +442,7 @@ export default {
     },
     handleMouseLeave(event) {
       this.isMessageHovered = false;
-    },
+    }
   },
   mounted() {
     if (this.isInChannel)
@@ -448,6 +451,6 @@ export default {
       });
 
     this.formatMentions();
-  },
+  }
 };
 </script>

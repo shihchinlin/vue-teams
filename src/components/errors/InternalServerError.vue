@@ -1,9 +1,9 @@
 <template>
-  <ErrorBase class="my-5" :search="false" :back="false">
+  <ErrorBase class="my-5">
     <i class="fa fa-wrench" slot="icon" />
-    <span slot="header">服務發生錯誤</span>
+    <span slot="header">Internal Server Error</span>
     <span slot="description">
-      這項服務或功能發生異常，請回報總公司資訊處。
+      There was an internal server error while processing the request.
     </span>
   </ErrorBase>
 </template>
@@ -14,11 +14,6 @@ import ErrorBase from "@/components/errors/ErrorBase";
 export default {
   components: {
     ErrorBase
-  },
-  methods: {
-    reload() {
-      location.reload();
-    }
   }
 };
 </script>

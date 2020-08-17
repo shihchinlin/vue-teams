@@ -1,9 +1,10 @@
 <template>
-  <ErrorBase class="my-5" :search="false" :back="false">
+  <ErrorBase class="my-5">
     <i class="fa fa-file-excel" slot="icon" />
-    <span slot="header">不支援討論功能</span>
+    <span slot="header">Unsupported Media Type</span>
     <span slot="description">
-      目前的檢視內容不支援討論功能，請由左邊選單選擇一個主題。
+      The content type of the request is a format that is not supported by the
+      service.
     </span>
   </ErrorBase>
 </template>

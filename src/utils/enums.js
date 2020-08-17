@@ -6,7 +6,7 @@ export const MicrosoftGraphStatus = Object.freeze({
   GatewayTimeout: "GatewayTimeout",
   InternalServerError: "InternalServerError",
   ServiceUnavailable: "ServiceUnavailable",
-  Unauthorized: "Unauthorized",
+  Unauthorized: "Unauthorized"
 });
 
 export const UserPresences = Object.freeze({
@@ -18,5 +18,5 @@ export const UserPresences = Object.freeze({
   BusyIdle: { value: "BusyIdle", colorVariant: "danger" },
   DoNotDisturb: { value: "DoNotDisturb", colorVariant: "danger" },
   Offline: { value: "Offline", colorVariant: "secondary" },
-  PresenceUnknown: { value: "PresenceUnknown", colorVariant: "secondary" },
+  PresenceUnknown: { value: "PresenceUnknown", colorVariant: "secondary" }
 });

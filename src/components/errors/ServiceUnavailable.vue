@@ -1,13 +1,11 @@
 <template>
-  <ErrorBase class="my-5" :search="false" :back="false">
+  <ErrorBase class="my-5">
     <i class="fa fa-wrench" slot="icon" />
-    <span slot="header">服務維護中</span>
+    <span slot="header">Service Unavailable</span>
     <span slot="description">
-      這項服務或功能現在工程人員正在進行維護，您可以選擇
-      <span class="text-primary cursor-pointer" @click="reload()">
-        重新整理
-      </span>
-      或者稍後再試。
+      The service is temporarily unavailable for maintenance or is overloaded.
+      You may repeat the request after a delay, the length of which may be
+      specified in a Retry-After header.
     </span>
   </ErrorBase>
 </template>
@@ -18,11 +16,6 @@ import ErrorBase from "@/components/errors/ErrorBase";
 export default {
   components: {
     ErrorBase
-  },
-  methods: {
-    reload() {
-      location.reload();
-    }
   }
 };
 </script>

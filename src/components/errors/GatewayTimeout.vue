@@ -1,13 +1,11 @@
 <template>
-  <ErrorBase class="my-5" :search="false" :back="false">
+  <ErrorBase class="my-5">
     <i class="fa fa-wrench" slot="icon" />
-    <span slot="header">服務連線逾時</span>
+    <span slot="header">Gateway Timeout</span>
     <span slot="description">
-      網路連線速度太慢或這項服務或功能現在忙碌中，您可以選擇
-      <span class="text-primary cursor-pointer" @click="reload()">
-        重新整理
-      </span>
-      或者稍後再試。
+      The server, while acting as a proxy, did not receive a timely response
+      from the upstream server it needed to access in attempting to complete the
+      request.
     </span>
   </ErrorBase>
 </template>

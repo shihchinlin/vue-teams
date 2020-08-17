@@ -1,10 +1,11 @@
 import {
+  CHANGE_GRAPH_STATUS,
   SIGNIN_GRAPH_REQUEST,
   SIGNIN_GRAPH_SUCCESS,
   SIGNIN_GRAPH_FAILED,
   SIGNOUT_GRAPH_REQUEST,
   SIGNOUT_GRAPH_SUCCESS,
-  SIGNOUT_GRAPH_FAILED,
+  SIGNOUT_GRAPH_FAILED
 } from "./types";
 import { MicrosoftGraphStatus } from "../../../utils/enums";
 import { login, logout, getUser } from "../../../api/microsoft";
@@ -19,20 +20,17 @@ export default {
       !state.msal.app ||
       !state.graph.client
     ) {
-      state.status = MicrosoftGraphStatus.LoggingIn;
+      commit(CHANGE_GRAPH_STATUS, MicrosoftGraphStatus.LoggingIn);
       login(tenantId, clientId, redirectUri)
-        .then((client) => {
+        .then(client => {
           commit(SIGNIN_GRAPH_SUCCESS, client);
-          getUser()
-            .then((me) => {
-              commit(SIGNIN_GRAPH_SUCCESS, [...client, me]);
-            })
-            .catch((error) => {
-              commit(SIGNIN_GRAPH_FAILED, error);
-            });
-          state.status = MicrosoftGraphStatus.LoggedIn;
+          getUser().then(me => {
+            commit(SIGNIN_GRAPH_SUCCESS, [...client, me]);
+            commit(CHANGE_GRAPH_STATUS, MicrosoftGraphStatus.LoggedIn);
+          });
         })
-        .catch((error) => {
+        .catch(error => {
+          commit(CHANGE_GRAPH_STATUS, MicrosoftGraphStatus.LoggedOut);
           commit(SIGNIN_GRAPH_FAILED, error);
         });
     }
@@ -41,9 +39,11 @@ export default {
     logout(state.me.userPrincipalName)
       .then(() => {
         commit(SIGNOUT_GRAPH_SUCCESS);
+        commit(CHANGE_GRAPH_STATUS, MicrosoftGraphStatus.LoggedOut);
       })
-      .catch((error) => {
+      .catch(error => {
+        commit(CHANGE_GRAPH_STATUS, MicrosoftGraphStatus.LoggedOut);
         commit(SIGNOUT_GRAPH_FAILED, error);
       });
-  },
+  }
 };

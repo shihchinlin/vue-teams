@@ -7,7 +7,7 @@ import { UserPresences } from "../utils/enums";
 const msalBaseConfig = {
   cache: {
     cacheLocation: "sessionStorage",
-    storeAuthStateInCookie: false,
+    storeAuthStateInCookie: false
   },
   system: {
     loggerOptions: {
@@ -29,9 +29,9 @@ const msalBaseConfig = {
             console.warn(message);
             return;
         }
-      },
-    },
-  },
+      }
+    }
+  }
 };
 
 const loginRequestScopes = ["User.Read"];
@@ -49,7 +49,7 @@ const tokenRequestScopes = [
   "ChannelMessage.Read.All",
   "ChannelMessage.Send",
   "ChannelMessage.Edit",
-  "ChannelMessage.Delete",
+  "ChannelMessage.Delete"
 ];
 
 class MSALAuthenticationProvider {
@@ -76,11 +76,11 @@ class MSALAuthenticationProvider {
     }
     if (this.msalApplication.getAccountByUsername(this.account.username)) {
       const popupTokenRequest = {
-        scopes,
+        scopes
       };
       const silentTokenRequest = {
         account: this.account,
-        scopes,
+        scopes
       };
       try {
         const authResponse = await this.msalApplication.acquireTokenSilent(
@@ -104,11 +104,11 @@ class MSALAuthenticationProvider {
     } else {
       try {
         const popupTokenRequest = {
-          scopes,
+          scopes
         };
         const silentTokenRequest = {
           account: this.account,
-          scopes,
+          scopes
         };
         await this.msalApplication.loginPopup(popupTokenRequest);
         const authResponse = await this.msalApplication.acquireTokenSilent(
@@ -127,12 +127,12 @@ export const login = (tenantId, clientId, redirectUri) => {
     auth: {
       clientId: clientId,
       authority: "https://login.microsoftonline.com/" + tenantId,
-      redirectUri: redirectUri,
-    },
+      redirectUri: redirectUri
+    }
   });
   const msalApplication = new msal.PublicClientApplication(msalConfig);
   const loginRequest = Object.assign({}, { scopes: loginRequestScopes });
-  return msalApplication.loginPopup(loginRequest).then((loginResponse) => {
+  return msalApplication.loginPopup(loginRequest).then(loginResponse => {
     if (loginResponse !== null) {
       const msalAuthenticationProvider = new MSALAuthenticationProvider(
         msalApplication,
@@ -140,7 +140,7 @@ export const login = (tenantId, clientId, redirectUri) => {
         loginResponse.account
       );
       const graphClient = MicrosoftGraphClient.Client.initWithMiddleware({
-        authProvider: msalAuthenticationProvider,
+        authProvider: msalAuthenticationProvider
       });
       return [msalApplication, graphClient];
     } else {
@@ -149,9 +149,9 @@ export const login = (tenantId, clientId, redirectUri) => {
   });
 };
 
-export const logout = async (username) => {
+export const logout = async username => {
   const logoutRequest = {
-    account: store.state.microsoft.msal.app.getAccountByUsername(username),
+    account: store.state.microsoft.msal.app.getAccountByUsername(username)
   };
 
   return store.state.microsoft.msal.app.logout(logoutRequest);
@@ -168,7 +168,7 @@ export const refreshPresences = async () => {
     .api("/communications/getPresencesByUserId")
     .version("beta")
     .post({ ids: Object.keys(store.state.microsoft.presences) })
-    .then((res) => {
+    .then(res => {
       for (let presence of res.value) {
         store.state.microsoft.presences[presence.id] =
           UserPresences[presence.availability];
@@ -176,7 +176,7 @@ export const refreshPresences = async () => {
     });
 };
 
-export const getTeam = async (teamId) => {
+export const getTeam = async teamId => {
   return await store.state.microsoft.graph.client.api(`/teams/${teamId}`).get();
 };
 
@@ -191,7 +191,7 @@ export const listChannelMembers = async (teamId, channelId) => {
     .api(`/teams/${teamId}/channels/${channelId}/members`)
     .version("beta")
     .get()
-    .then((res) => res.value);
+    .then(res => res.value);
 };
 
 export const listChannelMessages = async (teamId, channelId) => {
@@ -199,7 +199,7 @@ export const listChannelMessages = async (teamId, channelId) => {
     .api(`/teams/${teamId}/channels/${channelId}/messages`)
     .version("beta")
     .get()
-    .then((res) => res.value);
+    .then(res => res.value);
 };
 
 export const listMessageReplies = async (teamId, channelId, messageId) => {
@@ -207,7 +207,7 @@ export const listMessageReplies = async (teamId, channelId, messageId) => {
     .api(`/teams/${teamId}/channels/${channelId}/messages/${messageId}/replies`)
     .version("beta")
     .get()
-    .then((res) => res.value);
+    .then(res => res.value);
 };
 
 export const getHostedContent = async (
@@ -225,9 +225,10 @@ export const getHostedContent = async (
 };
 
 export const sendMessage = async (teamId, channelId, message) => {
-  return await store.state.microsoft.graph.client
+  console.log(message);
+  /*return await store.state.microsoft.graph.client
     .api(`/teams/${teamId}/channels/${channelId}/messages`)
-    .post(message);
+    .post(message);*/
 };
 
 export const replyToMessage = async (teamId, channelId, messageId, message) => {

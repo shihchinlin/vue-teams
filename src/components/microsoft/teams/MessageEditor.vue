@@ -4,7 +4,7 @@
       'message-editor',
       'position-relative',
       'mask-wrapper',
-      $store.state.card.isDragging ? 'droppable' : '',
+      $store.state.card.isDragging ? 'droppable' : ''
     ]"
     @dragover.prevent=""
     @drop="handleCardDrop"
@@ -98,26 +98,25 @@ import "quill/dist/quill.bubble.css";
 import { quillEditor as VueQuillEditor } from "vue-quill-editor";
 import Mention from "quill-mention";
 
-import mixin from "../../../mixins/Format";
 import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
+import { formatNameInitials, toastMessage } from "../../../utils/utils";
 import {
   sendMessage,
   replyToMessage,
-  listChannelMembers,
+  listChannelMembers
 } from "../../../api/microsoft";
 
 Quill.register("modules/mention", Mention);
 
 export default {
-  mixins: [mixin],
   components: {
-    VueQuillEditor,
+    VueQuillEditor
   },
   props: {
     teamId: { type: String, required: true },
     channelId: { type: String, required: true },
     messageId: { type: String, default: null },
-    message: { type: Object, default: null },
+    message: { type: Object, default: null }
   },
   data: function() {
     return {
@@ -130,9 +129,9 @@ export default {
       colorVariants: ["info", "primary", "success", "warning", "danger"],
       members: null,
       body: {
-        content: "",
+        content: ""
       },
-      mentions: [],
+      mentions: []
     };
   },
   computed: {
@@ -150,11 +149,11 @@ export default {
               "strike",
               { background: [] },
               { color: [] },
-              { align: [] },
-            ],
+              { align: [] }
+            ]
           ],
           clipboard: {
-            matchers: [["span.mention", this.trimMentionBadgeStyle]],
+            matchers: [["span.mention", this.trimMentionBadgeStyle]]
           },
           mention: {
             source: this.showMentionSuggestions,
@@ -167,15 +166,15 @@ export default {
               "value",
               "denotationChar",
               "mentionedUserId",
-              "href",
+              "href"
             ],
             onSelect: this.handleMentionSuggestionSelected,
             mentionContainerClass: "ql-mention-list-container",
             mentionListClass: "ql-mention-list list-group",
             listItemClass:
-              "ql-mention-list-item list-group-item list-group-item-action p-2",
-          },
-        },
+              "ql-mention-list-item list-group-item list-group-item-action p-2"
+          }
+        }
       };
     },
     isEditingMessage() {
@@ -185,14 +184,14 @@ export default {
       return {
         body: {
           contentType: "html",
-          content: this.body.content,
+          content: this.body.content
         },
-        mentions: this.mentions,
+        mentions: this.mentions
       };
-    },
+    }
   },
   methods: {
-    ...mapMutations({ _toggleCardsSelection: "card/TOGGLE_MODE_SELECTABLE" }),
+    ...mapMutations({ _toggleCardsSelection: "card/TOGGLE_SELECTABLE" }),
     mention(type, mention) {
       if (!this.$refs["editor"].quill.getModule("mention").mentionCharPos)
         this.$refs["editor"].quill.getModule("mention").mentionCharPos = 0;
@@ -201,7 +200,7 @@ export default {
           Object.assign(
             {
               id: 0,
-              denotationChar: "@",
+              denotationChar: "@"
             },
             mention
           )
@@ -212,7 +211,7 @@ export default {
           Object.assign(
             {
               id: 0,
-              denotationChar: "#",
+              denotationChar: "#"
             },
             mention
           )
@@ -235,7 +234,7 @@ export default {
             ) % this.colorVariants.length
           ] +
           ' rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span>' +
-          this.formatNameInitials(item.value) +
+          formatNameInitials(item.value) +
           '</span></span></span><div class="d-flex flex-column align-items-start"> ' +
           item.value +
           ' <small class="d-block text-muted"> ' +
@@ -262,7 +261,7 @@ export default {
     async suggestMembers(keyword) {
       if (this.members === null) {
         this.members = await listChannelMembers(this.teamId, this.channelId);
-        this.members.forEach((i) => {
+        this.members.forEach(i => {
           if (
             !Object.keys(this.$store.state.microsoft.presences).includes(
               i.userId
@@ -283,7 +282,7 @@ export default {
       }
       return this.members
         .filter(
-          (member) =>
+          member =>
             (member.displayName.includes(keyword) ||
               member.email.includes(keyword)) &&
             member.userId !== this.$store.state.microsoft.me.id
@@ -293,7 +292,7 @@ export default {
             id: memberIndex,
             value: member.displayName,
             mentionedUserId: member.userId,
-            email: member.email,
+            email: member.email
           };
         });
     },
@@ -310,17 +309,17 @@ export default {
               this.$route.path +
               "#" +
               card.getAttribute("name")
-          ),
+          )
         };
       });
-      return cards.filter((card) => card.value.includes(keyword));
+      return cards.filter(card => card.value.includes(keyword));
     },
     sendMessage() {
       if (this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn)
         if (this.body.content !== "") {
           {
             if (this.message) {
-              this.toastMessage(
+              toastMessage(
                 "尚未支援編輯討論訊息",
                 "Microsoft Graph API目前尚不支援編輯Microsoft Teams訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行編輯。",
                 "warning"
@@ -344,7 +343,7 @@ export default {
                       this.mentions
                     )
                   );
-              api.then((res) => {
+              api.then(res => {
                 this.$emit("replied", res);
               });
               this.body.content = "";
@@ -415,7 +414,7 @@ export default {
               this.$route.path +
               "#" +
               payload.content.name
-          ),
+          )
         });
       this.$store.state.card.isDragging = false;
       this._toggleCardsSelection();
@@ -451,7 +450,7 @@ export default {
       let re = "^" + location.href + process.env.BASE_URL + ".*#";
       mentionNodes = Array.from(
         contentNode.getElementsByTagName("a")
-      ).filter((i) => i.href.match(new Regex(re)));
+      ).filter(i => i.href.match(new Regex(re)));
       mentionNodes.forEach((mentionNode, mentionNodeIndex) => {
         const mentionCardName = decodeURI(mentionNode.href).split("#")[1];
         mentionNode.innerHTML =
@@ -478,11 +477,11 @@ export default {
       let mentionNodes = Array.from(
         contentNode.getElementsByClassName("mention")
       );
-      mentionNodes.forEach((mentionNode) => {
+      mentionNodes.forEach(mentionNode => {
         let denotationChar = mentionNode.getAttribute("data-denotation-char");
         if (denotationChar === "@") {
           let mentionsLookup = mentions.filter(
-            (i) =>
+            i =>
               i.mentioned.user.id ===
               mentionNode.getAttribute("data-mentionedUserId")
           );
@@ -497,9 +496,9 @@ export default {
                 user: {
                   displayName: mentionNode.getAttribute("data-value"),
                   id: mentionNode.getAttribute("data-mentionedUserId"),
-                  userIdentityType: "aadUser",
-                },
-              },
+                  userIdentityType: "aadUser"
+                }
+              }
             });
           }
           mentionNode.innerHTML =
@@ -526,20 +525,20 @@ export default {
       return {
         body: {
           contentType: "html",
-          content: contentNode.innerHTML,
+          content: contentNode.innerHTML
         },
-        mentions: mentions,
+        mentions: mentions
       };
     },
     trimMentionBadgeStyle(node, delta) {
-      delta.forEach((e) => {
+      delta.forEach(e => {
         if (e.attributes) {
           e.attributes.color = "";
           e.attributes.background = "";
         }
       });
       return delta;
-    },
+    }
   },
   async mounted() {
     if (this.isMobile || this.isAppleIOSWebView) {
@@ -567,14 +566,14 @@ export default {
           this.body.content.replace(/<\/?[^>]+(>|$)/g, "").endsWith("#")
         );
       },
-      deep: true,
+      deep: true
     },
     teamId() {
       this.members = null;
     },
     channelId() {
       this.members = null;
-    },
-  },
+    }
+  }
 };
 </script>

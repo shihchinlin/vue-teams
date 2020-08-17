@@ -1,9 +1,10 @@
 <template>
-  <ErrorBase class="my-5" :search="false" :back="false">
+  <ErrorBase class="my-5">
     <i class="fa fa-times-circle" slot="icon" />
-    <span slot="header">權限不足</span>
+    <span slot="header">Forbidden</span>
     <span slot="description">
-      沒有足夠的權限瀏覽，請聯絡總公司資訊處申請權限。
+      Access is denied to the requested resource. The user might not have enough
+      permission.
     </span>
   </ErrorBase>
 </template>
