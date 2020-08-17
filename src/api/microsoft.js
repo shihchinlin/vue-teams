@@ -2,7 +2,7 @@ import * as msal from "@azure/msal-browser";
 import { MSALAuthenticationProviderOptions } from "@microsoft/microsoft-graph-client/lib/src/MSALAuthenticationProviderOptions";
 import * as MicrosoftGraphClient from "@microsoft/microsoft-graph-client";
 import store from "@/store";
-import { UserPresences } from "@/utils/enums";
+import { UserPresences } from "../utils/enums";
 
 const msalBaseConfig = {
   cache: {

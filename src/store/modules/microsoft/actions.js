@@ -6,8 +6,8 @@ import {
   SIGNOUT_GRAPH_SUCCESS,
   SIGNOUT_GRAPH_FAILED,
 } from "./types";
-import { MicrosoftGraphStatus } from "@/utils/enums";
-import { login, logout, getUser } from "@/api/microsoft";
+import { MicrosoftGraphStatus } from "../../../utils/enums";
+import { login, logout, getUser } from "../../../api/microsoft";
 
 export default {
   [SIGNIN_GRAPH_REQUEST]: async (

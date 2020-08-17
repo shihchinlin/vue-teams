@@ -109,17 +109,19 @@
 </template>
 
 <script>
-import { MicrosoftGraphStatus } from "@/utils/enums";
 import VuePerfectScrollbar from "vue-perfect-scrollbar";
-import Forbidden from "@/components/errors/Forbidden";
-import GatewayTimeout from "@/components/errors/GatewayTimeout";
-import InternalServerError from "@/components/errors/InternalServerError";
-import ServiceUnavailable from "@/components/errors/ServiceUnavailable";
-import Unauthorized from "@/components/errors/Unauthorized";
-import UnsupportedMediaType from "@/components/errors/UnsupportedMediaType";
-import Channel from "@/components/microsoft/teams/Channel";
-import MessageEditor from "@/components/microsoft/teams/MessageEditor";
-import Spinner from "@/components/Spinner";
+
+import Forbidden from "../../errors/Forbidden";
+import GatewayTimeout from "../../errors/GatewayTimeout";
+import InternalServerError from "../../errors/InternalServerError";
+import ServiceUnavailable from "../../errors/ServiceUnavailable";
+import Unauthorized from "../../errors/Unauthorized";
+import UnsupportedMediaType from "../../errors/UnsupportedMediaType";
+
+import { MicrosoftGraphStatus } from "../../../utils/enums";
+import Channel from "./Channel";
+import MessageEditor from "./MessageEditor";
+import Spinner from "../../Spinner";
 
 export default {
   components: {

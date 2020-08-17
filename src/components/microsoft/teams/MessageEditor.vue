@@ -92,18 +92,20 @@
 <script>
 import { mapGetters, mapMutations } from "vuex";
 import Quill from "quill";
+import "quill/dist/quill.core.css";
+import "quill/dist/quill.snow.css";
+import "quill/dist/quill.bubble.css";
 import { quillEditor as VueQuillEditor } from "vue-quill-editor";
 import Mention from "quill-mention";
-import mixin from "@/mixins/Format";
-import { MicrosoftGraphStatus, UserPresences } from "@/utils/enums";
+
+import mixin from "../../../mixins/Format";
+import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
 import {
   sendMessage,
   replyToMessage,
   listChannelMembers,
-} from "@/api/microsoft";
-import "quill/dist/quill.core.css";
-import "quill/dist/quill.snow.css";
-import "quill/dist/quill.bubble.css";
+} from "../../../api/microsoft";
+
 Quill.register("modules/mention", Mention);
 
 export default {

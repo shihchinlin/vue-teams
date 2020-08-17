@@ -2,9 +2,9 @@ import {
   SIGNIN_GRAPH_SUCCESS,
   SIGNIN_GRAPH_FAILED,
   SIGNOUT_GRAPH_SUCCESS,
-  SIGNOUT_GRAPH_FAILED
+  SIGNOUT_GRAPH_FAILED,
 } from "./types";
-import { UserPresences, MicrosoftGraphStatus } from "@/utils/enums";
+import { UserPresences, MicrosoftGraphStatus } from "../../../utils/enums";
 
 export default {
   [SIGNIN_GRAPH_SUCCESS]: (state, payload) => {
@@ -20,7 +20,7 @@ export default {
     state.error = error;
     state.status = MicrosoftGraphStatus.LoggedOut;
   },
-  [SIGNOUT_GRAPH_SUCCESS]: state => {
+  [SIGNOUT_GRAPH_SUCCESS]: (state) => {
     state.msal.app = undefined;
     state.graph.client = undefined;
     state.status = MicrosoftGraphStatus.LoggedOut;
@@ -28,5 +28,5 @@ export default {
   [SIGNOUT_GRAPH_FAILED]: (state, error) => {
     state.error = error;
     state.status = MicrosoftGraphStatus.LoggedOut;
-  }
+  },
 };

@@ -50,15 +50,16 @@
 <script>
 import _ from "lodash";
 import Vue from "vue";
-import { MicrosoftGraphStatus, UserPresences } from "@/utils/enums";
+
+import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
 import {
   getTeam,
   getChannel,
   refreshPresences,
   listChannelMessages,
-} from "@/api/microsoft";
-import Message from "@/components/microsoft/teams/Message";
-import Spinner from "@/components/Spinner";
+} from "../../../api/microsoft";
+import Message from "./Message";
+import Spinner from "../../Spinner";
 
 export default {
   name: "Channel",

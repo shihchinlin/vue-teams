@@ -185,14 +185,15 @@
 <script>
 import _ from "lodash";
 import { mapGetters } from "vuex";
-import mixin from "@/mixins/Format";
-import { MicrosoftGraphStatus, UserPresences } from "@/utils/enums";
+
+import mixin from "../../../mixins/Format";
+import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
 import {
   listMessageReplies,
   refreshPresences,
   getHostedContent,
-} from "@/api/microsoft";
-import MessageEditor from "@/components/microsoft/teams/MessageEditor";
+} from "../../../api/microsoft";
+import MessageEditor from "./MessageEditor";
 
 export default {
   name: "Message",
