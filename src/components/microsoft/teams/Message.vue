@@ -189,8 +189,7 @@ import { mapGetters } from "vuex";
 import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
 import {
   formatDateTimeFromNow,
-  formatNameInitials,
-  toastMessage
+  formatNameInitials
 } from "../../../utils/utils";
 import {
   listMessageReplies,
@@ -318,10 +317,16 @@ export default {
     },
     deleteMessage() {
       if (this.isDeleteConfirmed) {
-        toastMessage(
-          "尚未支援刪除討論訊息",
-          "Microsoft Graph API目前尚不支援編輯Microsoft Teams訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行刪除。",
-          "warning"
+        this.$bvToast.toast(
+          "Microsoft Graph API目前尚不支援刪除訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行刪除。",
+          {
+            title: "尚未支援刪除討論訊息",
+            variant: "warning",
+            noAutoHide: true,
+            autoHideDelay: 3000,
+            dismissible: true,
+            toaster: "b-toaster-bottom-right"
+          }
         );
         this.isDeleteConfirmed = false;
       } else {
@@ -331,19 +336,19 @@ export default {
     formatMentions() {
       if (this.$refs["content"]) {
         Array.from(this.$refs["content"].getElementsByTagName("at")).map(i => {
-          let member_name = i.textContent;
-          let menber_id = this.message.mentions[i.getAttribute("id")].mentioned
+          let memberName = i.textContent;
+          let memberId = this.message.mentions[i.getAttribute("id")].mentioned
             .user.id;
-          i.title = member_name;
-          i.innerHTML = '<i class="fa fa-user"></i> ' + member_name;
+          i.title = memberName;
+          i.innerHTML = '<i class="fa fa-user"></i> ' + memberName;
           i.classList.add("badge-secondary");
           i.classList.add("badge-pill");
           i.classList.add("text-light");
           i.classList.add("cursor-pointer");
           i.addEventListener("click", () => {
             this.mention("member", {
-              value: member_name,
-              mentionedUserId: menber_id
+              value: memberName,
+              mentionedUserId: memberId
             });
           });
         });

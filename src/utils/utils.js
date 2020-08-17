@@ -13,20 +13,3 @@ export function formatNameInitials(name) {
         .join("")
     : name;
 }
-
-export function toastMessage(
-  title,
-  message,
-  variant = null,
-  auto_hide = true,
-  position = "bottom-right"
-) {
-  this.$bvToast.toast(message, {
-    title: title,
-    variant,
-    noAutoHide: !auto_hide,
-    autoHideDelay: 3000,
-    dismissible: false,
-    toaster: "b-toaster-" + (this.is_in_multiscreen ? "bottom-left" : position)
-  });
-}

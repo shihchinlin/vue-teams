@@ -99,7 +99,7 @@ import { quillEditor as VueQuillEditor } from "vue-quill-editor";
 import Mention from "quill-mention";
 
 import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
-import { formatNameInitials, toastMessage } from "../../../utils/utils";
+import { formatNameInitials } from "../../../utils/utils";
 import {
   sendMessage,
   replyToMessage,
@@ -238,7 +238,7 @@ export default {
           '</span></span></span><div class="d-flex flex-column align-items-start"> ' +
           item.value +
           ' <small class="d-block text-muted"> ' +
-          item.email +
+          (item.email ? item.email : item.mentionedUserId) +
           " </small></div></div>"
         );
       } else if (item.href) {
@@ -319,10 +319,16 @@ export default {
         if (this.body.content !== "") {
           {
             if (this.message) {
-              toastMessage(
-                "尚未支援編輯討論訊息",
-                "Microsoft Graph API目前尚不支援編輯Microsoft Teams訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行編輯。",
-                "warning"
+              this.$bvToast.toast(
+                "Microsoft Graph API目前尚不支援編輯訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行編輯。",
+                {
+                  title: "尚未支援編輯討論訊息",
+                  variant: "warning",
+                  noAutoHide: true,
+                  autoHideDelay: 3000,
+                  dismissible: true,
+                  toaster: "b-toaster-bottom-right"
+                }
               );
             } else {
               let api = this.messageId
@@ -483,7 +489,7 @@ export default {
           let mentionsLookup = mentions.filter(
             i =>
               i.mentioned.user.id ===
-              mentionNode.getAttribute("data-mentionedUserId")
+              mentionNode.getAttribute("data-mentioned-user-id")
           );
           let mentionsIndex = -1;
           if (mentionsLookup.length > 0) mentionsIndex = mentionsLookup[0].id;
@@ -495,7 +501,7 @@ export default {
               mentioned: {
                 user: {
                   displayName: mentionNode.getAttribute("data-value"),
-                  id: mentionNode.getAttribute("data-mentionedUserId"),
+                  id: mentionNode.getAttribute("data-mentioned-user-id"),
                   userIdentityType: "aadUser"
                 }
               }

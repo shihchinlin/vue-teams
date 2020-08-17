@@ -225,10 +225,9 @@ export const getHostedContent = async (
 };
 
 export const sendMessage = async (teamId, channelId, message) => {
-  console.log(message);
-  /*return await store.state.microsoft.graph.client
+  return await store.state.microsoft.graph.client
     .api(`/teams/${teamId}/channels/${channelId}/messages`)
-    .post(message);*/
+    .post(message);
 };
 
 export const replyToMessage = async (teamId, channelId, messageId, message) => {
