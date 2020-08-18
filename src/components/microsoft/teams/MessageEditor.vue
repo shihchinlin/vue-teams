@@ -410,7 +410,7 @@ export default {
             location.origin +
             location.pathname +
             "#" +
-            encodeURI(payload.content.name)
+            encodeURIComponent(payload.content.name)
         });
       this.toggleDragging(false);
       this._toggleCardsSelection();

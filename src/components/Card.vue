@@ -51,7 +51,6 @@ export default {
     }
   },
   methods: {
-    ...mapMutations({ toggleDragging: "card/TOGGLE_DRAGGING" }),
     enterCard() {
       this.is_entering_card = true;
     },
