@@ -50,13 +50,14 @@
 <script>
 import _ from "lodash";
 import Vue from "vue";
+import { mapGetters, mapMutations } from "vuex";
 
-import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
+import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
 import {
   getTeam,
   getChannel,
   refreshPresences,
-  listChannelMessages,
+  listChannelMessages
 } from "../../../api/microsoft";
 import Message from "./Message";
 import Spinner from "../../Spinner";
@@ -65,38 +66,40 @@ export default {
   name: "Channel",
   components: {
     Message,
-    Spinner,
+    Spinner
   },
   props: {
     tenantId: { type: String, required: true },
     clientId: { type: String, required: true },
     redirectUri: { type: String, required: true },
     teamId: { type: String, required: true },
-    channelId: { type: String, required: true },
+    channelId: { type: String, required: true }
   },
   data: function() {
     return {
       team: {},
       channel: {},
-      messages: [],
+      messages: []
     };
   },
   computed: {
+    ...mapGetters("microsoft", ["status", "presences"]),
     teamId_channelId() {
       return this.teamId + this.channelId;
-    },
+    }
   },
   methods: {
+    ...mapMutations({
+      changeGraphStatus: "microsoft/CHANGE_GRAPH_STATUS"
+    }),
     loadChannel() {
-      if (
-        this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn
-      ) {
+      if (this.status === MicrosoftStatus.LoggedIn) {
         this.messages = [];
         this.$emit("reset");
         getTeam(this.teamId)
-          .then((team) => {
+          .then(team => {
             this.team = team;
-            getChannel(this.teamId, this.channelId).then((channel) => {
+            getChannel(this.teamId, this.channelId).then(channel => {
               this.channel = channel;
               return this.loadMessages().then(() => {
                 this.$nextTick(() => {
@@ -109,40 +112,30 @@ export default {
               });
             });
           })
-          .catch((error) => {
+          .catch(error => {
             if (error.statusCode === 403)
-              this.$store.state.microsoft.status =
-                MicrosoftGraphStatus.Forbidden;
+              this.changeGraphStatus(MicrosoftStatus.LoggingIn);
             else if (error.statusCode === 500)
-              this.$store.state.microsoft.status =
-                MicrosoftGraphStatus.InternalServerError;
+              this.changeGraphStatus(MicrosoftStatus.InternalServerError);
             else if (error.statusCode === 503)
-              this.$store.state.microsoft.status =
-                MicrosoftGraphStatus.ServiceUnavailable;
+              this.changeGraphStatus(MicrosoftStatus.ServiceUnavailable);
             else if (error.statusCode === 504)
-              this.$store.state.microsoft.status =
-                MicrosoftGraphStatus.GatewayTimeout;
-            else
-              this.$store.state.microsoft.status =
-                MicrosoftGraphStatus.ServiceUnavailable;
+              this.changeGraphStatus(MicrosoftStatus.GatewayTimeout);
+            else this.changeGraphStatus(MicrosoftStatus.ServiceUnavailable);
           });
       }
     },
     loadMessages() {
-      if (
-        this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn
-      ) {
+      if (this.status === MicrosoftStatus.LoggedIn) {
         return listChannelMessages(this.teamId, this.channelId).then(
-          (messages) => {
+          messages => {
             for (let message of messages) {
               if (
                 message.from &&
-                !Object.keys(this.$store.state.microsoft.presences).includes(
-                  message.from.user.id
-                )
+                !Object.keys(this.presences).includes(message.from.user.id)
               )
-                this.$store.state.microsoft.presences[message.from.user.id] =
-                  UserPresences.PresenceUnknown;
+                this.presences[message.from.user.id] =
+                  PresenceAvailabilities.PresenceUnknown;
             }
             refreshPresences();
             this.messages = messages.reverse();
@@ -159,20 +152,16 @@ export default {
       this.loadMessages();
     }, 5000),
     handleMessageCreated(event) {
-      if (
-        !Object.keys(this.$store.state.microsoft.presences).includes(
-          event.from.user.id
-        )
-      )
-        this.$store.state.microsoft.presences[event.from.user.id] =
-          UserPresences.PresenceUnknown;
+      if (!Object.keys(this.presences).includes(event.from.user.id))
+        this.presences[event.from.user.id] =
+          PresenceAvailabilities.PresenceUnknown;
       refreshPresences();
 
       this.messages.push(event);
     },
     emitEventDebounced: _.debounce(function(event) {
       this.$emit(event);
-    }, 500),
+    }, 500)
   },
   mounted() {
     if (this.teamId_channelId) this.loadChannel();
@@ -180,8 +169,8 @@ export default {
   watch: {
     teamId_channelId() {
       this.loadChannel();
-    },
-  },
+    }
+  }
 };
 </script>
 

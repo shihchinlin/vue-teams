@@ -1,5 +1,8 @@
 export default {
-  is_selectable: state => {
+  isCardSelectable: state => {
     return state.capabilities.selectable;
+  },
+  isCardDragging: state => {
+    return state.dragging;
   }
 };

@@ -1,34 +1,27 @@
 <template>
-  <Spinner
-    v-if="$store.state.microsoft.status === MicrosoftGraphStatus.LoggingIn"
-  />
+  <Spinner v-if="$store.state.microsoft.status === MicrosoftStatus.LoggingIn" />
   <Forbidden
-    v-else-if="$store.state.microsoft.status === MicrosoftGraphStatus.Forbidden"
+    v-else-if="$store.state.microsoft.status === MicrosoftStatus.Forbidden"
   />
   <GatewayTimeout
-    v-else-if="
-      $store.state.microsoft.status === MicrosoftGraphStatus.GatewayTimeout
-    "
+    v-else-if="$store.state.microsoft.status === MicrosoftStatus.GatewayTimeout"
   />
   <InternalServerError
     v-else-if="
-      $store.state.microsoft.status === MicrosoftGraphStatus.InternalServerError
+      $store.state.microsoft.status === MicrosoftStatus.InternalServerError
     "
   />
   <ServiceUnavailable
     v-else-if="
-      $store.state.microsoft.status === MicrosoftGraphStatus.ServiceUnavailable
+      $store.state.microsoft.status === MicrosoftStatus.ServiceUnavailable
     "
   />
   <Unauthorized
-    v-else-if="
-      $store.state.microsoft.status === MicrosoftGraphStatus.Unauthorized
-    "
+    v-else-if="$store.state.microsoft.status === MicrosoftStatus.Unauthorized"
   />
   <div
     v-else-if="
-      $store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn &&
-        isLoaded
+      $store.state.microsoft.status === MicrosoftStatus.LoggedIn && isLoaded
     "
     class="discuss position-relative"
   >
@@ -110,6 +103,7 @@
 
 <script>
 import VuePerfectScrollbar from "vue-perfect-scrollbar";
+import modules from "../../../store/modules";
 
 import Forbidden from "../../errors/Forbidden";
 import GatewayTimeout from "../../errors/GatewayTimeout";
@@ -118,7 +112,7 @@ import ServiceUnavailable from "../../errors/ServiceUnavailable";
 import Unauthorized from "../../errors/Unauthorized";
 import UnsupportedMediaType from "../../errors/UnsupportedMediaType";
 
-import { MicrosoftGraphStatus } from "../../../utils/enums";
+import { MicrosoftStatus } from "../../../utils/enums";
 import Channel from "./Channel";
 import MessageEditor from "./MessageEditor";
 import Spinner from "../../Spinner";
@@ -134,21 +128,21 @@ export default {
     UnsupportedMediaType,
     Channel,
     MessageEditor,
-    Spinner,
+    Spinner
   },
   props: {
     tenantId: { type: String, required: true },
     clientId: { type: String, required: true },
     redirectUri: { type: String, required: true },
     teamId: { type: String, required: true },
-    channelId: { type: String, required: true },
+    channelId: { type: String, required: true }
   },
   data: () => {
     return {
-      MicrosoftGraphStatus: MicrosoftGraphStatus,
+      MicrosoftStatus: MicrosoftStatus,
       showingModal: false,
       showingMessageEditorInModal: false,
-      isLoaded: true,
+      isLoaded: true
     };
   },
   computed: {
@@ -158,18 +152,18 @@ export default {
         clientId: this.clientId,
         redirectUri: this.redirectUri,
         teamId: this.teamId,
-        channelId: this.channelId,
+        channelId: this.channelId
       });
-    },
+    }
   },
   methods: {
     async loadChannel() {
       this.isLoaded = false;
-      if (this.$store.state.microsoft.status !== MicrosoftGraphStatus.LoggedIn)
+      if (this.status !== MicrosoftStatus.LoggedIn)
         await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
           tenantId: this.tenantId,
           clientId: this.clientId,
-          redirectUri: this.redirectUri,
+          redirectUri: this.redirectUri
         });
       this.isLoaded = true;
     },
@@ -201,7 +195,13 @@ export default {
           element.$refs["modal"].scrollTop = 0;
         }
       });
-    },
+    }
+  },
+  created() {
+    if (!this.$store.hasModule("microsoft"))
+      this.$store.registerModule("microsoft", modules.microsoft);
+    if (!this.$store.hasModule("card"))
+      this.$store.registerModule("card", modules.card);
   },
   mounted() {
     this.loadChannel();
@@ -209,8 +209,8 @@ export default {
   watch: {
     config: function() {
       this.loadChannel();
-    },
-  },
+    }
+  }
 };
 </script>
 

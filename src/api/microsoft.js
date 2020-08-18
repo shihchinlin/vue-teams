@@ -2,7 +2,7 @@ import * as msal from "@azure/msal-browser";
 import { MSALAuthenticationProviderOptions } from "@microsoft/microsoft-graph-client/lib/src/MSALAuthenticationProviderOptions";
 import * as MicrosoftGraphClient from "@microsoft/microsoft-graph-client";
 import store from "@/store";
-import { UserPresences } from "../utils/enums";
+import { PresenceAvailabilities } from "../utils/enums";
 
 const msalBaseConfig = {
   cache: {
@@ -171,7 +171,7 @@ export const refreshPresences = async () => {
     .then(res => {
       for (let presence of res.value) {
         store.state.microsoft.presences[presence.id] =
-          UserPresences[presence.availability];
+          PresenceAvailabilities[presence.availability];
       }
     });
 };

@@ -4,7 +4,7 @@
       'message-editor',
       'position-relative',
       'mask-wrapper',
-      $store.state.card.isDragging ? 'droppable' : ''
+      isCardDragging ? 'droppable' : ''
     ]"
     @dragover.prevent=""
     @drop="handleCardDrop"
@@ -98,7 +98,7 @@ import "quill/dist/quill.bubble.css";
 import { quillEditor as VueQuillEditor } from "vue-quill-editor";
 import Mention from "quill-mention";
 
-import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
+import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
 import { formatNameInitials } from "../../../utils/utils";
 import {
   sendMessage,
@@ -135,7 +135,11 @@ export default {
     };
   },
   computed: {
-    ...mapGetters({ isMentioningCard: "card/is_selectable" }),
+    ...mapGetters("microsoft", ["status", "presences"]),
+    ...mapGetters({
+      isMentioningCard: "card/isCardSelectable",
+      isCardDragging: "card/isCardDragging"
+    }),
     quillEditorOptions() {
       return {
         theme: "snow",
@@ -191,7 +195,10 @@ export default {
     }
   },
   methods: {
-    ...mapMutations({ _toggleCardsSelection: "card/TOGGLE_SELECTABLE" }),
+    ...mapMutations({
+      _toggleCardsSelection: "card/TOGGLE_SELECTABLE",
+      toggleDragging: "card/TOGGLE_DRAGGING"
+    }),
     mention(type, mention) {
       if (!this.$refs["editor"].quill.getModule("mention").mentionCharPos)
         this.$refs["editor"].quill.getModule("mention").mentionCharPos = 0;
@@ -229,9 +236,8 @@ export default {
         return (
           '<div class="d-flex align-items-center"><span class="b-avatar mr-2 badge-' +
           this.colorVariants[
-            Object.keys(this.$store.state.microsoft.presences).indexOf(
-              item.mentionedUserId
-            ) % this.colorVariants.length
+            Object.keys(this.presences).indexOf(item.mentionedUserId) %
+              this.colorVariants.length
           ] +
           ' rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span>' +
           formatNameInitials(item.value) +
@@ -246,9 +252,9 @@ export default {
           '<div class="d-flex align-items-center"><span class="b-avatar mr-2 badge-secondary rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span class="fa fa-chart-bar"></span></span></span><div class="d-flex flex-column align-items-start text-truncate" style="width: 150px;"> ' +
           item.value +
           ' <small class="d-block text-muted text-truncate" style="width: 150px;"  title="' +
-          this.$route.path +
+          decodeURIComponent(location.pathname) +
           '"> ' +
-          this.$route.path +
+          decodeURIComponent(location.pathname) +
           " </small></div></div>"
         );
       }
@@ -262,21 +268,12 @@ export default {
       if (this.members === null) {
         this.members = await listChannelMembers(this.teamId, this.channelId);
         this.members.forEach(i => {
-          if (
-            !Object.keys(this.$store.state.microsoft.presences).includes(
-              i.userId
-            )
-          )
-            this.$store.state.microsoft.presences[i.userId] =
-              UserPresences.PresenceUnknown;
+          if (!Object.keys(this.presences).includes(i.userId))
+            this.presences[i.userId] = PresenceAvailabilities.PresenceUnknown;
         });
         this.members.sort((a, b) => {
-          let a_order = Object.keys(
-            this.$store.state.microsoft.presences
-          ).indexOf(a.userId);
-          let b_order = Object.keys(
-            this.$store.state.microsoft.presences
-          ).indexOf(b.userId);
+          let a_order = Object.keys(this.presences).indexOf(a.userId);
+          let b_order = Object.keys(this.presences).indexOf(b.userId);
           return a_order - b_order;
         });
       }
@@ -285,7 +282,7 @@ export default {
           member =>
             (member.displayName.includes(keyword) ||
               member.email.includes(keyword)) &&
-            member.userId !== this.$store.state.microsoft.me.id
+            member.userId !== this.myId
         )
         .map((member, memberIndex) => {
           return {
@@ -303,19 +300,14 @@ export default {
         return {
           id: cardIndex,
           value: card.getAttribute("name"),
-          href: encodeURI(
-            location.origin +
-              process.env.BASE_URL.slice(0, -1) +
-              this.$route.path +
-              "#" +
-              card.getAttribute("name")
-          )
+          href:
+            location.href + "#" + encodeURIComponent(card.getAttribute("name"))
         };
       });
       return cards.filter(card => card.value.includes(keyword));
     },
     sendMessage() {
-      if (this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn)
+      if (this.status === MicrosoftStatus.LoggedIn)
         if (this.body.content !== "") {
           {
             if (this.message) {
@@ -414,15 +406,13 @@ export default {
       if (payload.type === "card")
         this.mention("card", {
           value: payload.content.name,
-          href: encodeURI(
+          href:
             location.origin +
-              process.env.BASE_URL.slice(0, -1) +
-              this.$route.path +
-              "#" +
-              payload.content.name
-          )
+            location.pathname +
+            "#" +
+            encodeURI(payload.content.name)
         });
-      this.$store.state.card.isDragging = false;
+      this.toggleDragging(false);
       this._toggleCardsSelection();
     },
     handleEditorBlur(event) {
@@ -453,7 +443,8 @@ export default {
         mentionNode.parentNode.removeChild(mentionNode);
       });
 
-      let re = "^" + location.href + process.env.BASE_URL + ".*#";
+      let re =
+        "^" + location.origin + process.env.BASE_URL.slice(0, -1) + ".*#";
       mentionNodes = Array.from(
         contentNode.getElementsByTagName("a")
       ).filter(i => i.href.match(new Regex(re)));

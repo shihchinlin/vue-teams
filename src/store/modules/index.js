@@ -1,5 +1,3 @@
-import camelCase from "lodash/camelCase";
-
 const modulesFiles = require.context("./", true, /\.js$/);
 const modules = {};
 

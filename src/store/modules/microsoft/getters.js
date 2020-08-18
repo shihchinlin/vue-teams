@@ -1,5 +1,5 @@
 export default {
-  id: state => {
+  myId: state => {
     return state.me.id;
   },
   status: state => {

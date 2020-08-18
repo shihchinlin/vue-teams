@@ -186,7 +186,7 @@
 import _ from "lodash";
 import { mapGetters } from "vuex";
 
-import { MicrosoftGraphStatus, UserPresences } from "../../../utils/enums";
+import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
 import {
   formatDateTimeFromNow,
   formatNameInitials
@@ -224,6 +224,7 @@ export default {
     };
   },
   computed: {
+    ...mapGetters("microsoft", ["myId", "status", "presences"]),
     messageBodyContent() {
       const contentNode = document.createElement("div");
       contentNode.innerHTML = this.message.body.content;
@@ -260,16 +261,14 @@ export default {
     },
     colorVariant() {
       return this.colorVariants[
-        Object.keys(this.$store.state.microsoft.presences).indexOf(
-          this.message.from.user.id
-        ) % this.colorVariants.length
+        Object.keys(this.presences).indexOf(this.message.from.user.id) %
+          this.colorVariants.length
       ];
     },
     colorVariantMe() {
       return this.colorVariants[
-        Object.keys(this.$store.state.microsoft.presences).indexOf(
-          this.$store.state.microsoft.me.id
-        ) % this.colorVariants.length
+        Object.keys(this.presences).indexOf(this.myId) %
+          this.colorVariants.length
       ];
     }
   },
@@ -278,9 +277,7 @@ export default {
     formatNameInitials,
     loadReplies() {
       //[TODO] check channel message is existed
-      if (
-        this.$store.state.microsoft.status === MicrosoftGraphStatus.LoggedIn
-      ) {
+      if (this.status === MicrosoftStatus.LoggedIn) {
         return listMessageReplies(
           this.teamId,
           this.channelId,
@@ -293,9 +290,9 @@ export default {
     loadRepliesThrottled: _.throttle(function() {
       this.loadReplies();
     }, 5000),
-    focusCard(card_name) {
+    focusCard(cardName) {
       document
-        .querySelectorAll(".card-wrapper .card[name='" + card_name + "']")
+        .querySelectorAll(".card-wrapper .card[name='" + cardName + "']")
         .forEach(i => {
           i.parentNode.classList.add("focused");
         });
@@ -353,36 +350,35 @@ export default {
           });
         });
 
-        let re = "^" + location.href + process.env.BASE_URL + ".*#";
+        let re =
+          "^" + location.origin + process.env.BASE_URL.slice(0, -1) + ".*#";
         Array.from(this.$refs["content"].getElementsByTagName("a"))
           .filter(i => i.href.match(new RegExp(re + ".*")))
           .map(i => {
-            let card_name = decodeURIComponent(
+            let cardName = decodeURIComponent(
               i.href.replace(new RegExp(re), "")
             );
-            i.title = card_name;
-            i.innerHTML = '<i class="fa fa-chart-bar"></i> ' + card_name;
+            i.title = cardName;
+            i.innerHTML = '<i class="fa fa-chart-bar"></i> ' + cardName;
             i.removeAttribute("href");
             i.classList.add("badge-secondary");
             i.classList.add("badge-pill");
             i.classList.add("text-light");
             i.classList.add("cursor-pointer");
             i.addEventListener("click", () => {
-              this.focusCard(card_name);
+              this.focusCard(cardName);
               this.mention("card", {
-                value: card_name,
-                href: encodeURI(
+                value: cardName,
+                href:
                   location.origin +
-                    process.env.BASE_URL +
-                    this.$route.path +
-                    "#" +
-                    card_name
-                )
+                  location.pathname +
+                  "#" +
+                  encodeURIComponent(cardName)
               });
             });
             i.addEventListener("mouseenter", () => {
               this.blurCards();
-              this.focusCard(card_name);
+              this.focusCard(cardName);
             });
             i.addEventListener("mouseleave", () => {
               if (!this.isMobile && !this.isAppleIOSWebView) this.blurCards();
@@ -401,20 +397,21 @@ export default {
             );
           })
           .map(i => {
-            const hosted_content_id = decodeURI(
+            const hostedContentId = decodeURI(
               i.getAttribute("target-src")
             ).split("/")[11];
             getHostedContent(
               this.teamId,
               this.channelId,
               this.message.id,
-              hosted_content_id
+              hostedContentId
             )
               .then(img => {
                 i.src = URL.createObjectURL(img);
               })
               .catch(() => {
-                i.src = process.env.BASE_URL.slice(0, -1) + "/img/image.svg";
+                i.src =
+                  "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDY0IDY0SDQ4QzIxLjQ5IDY0IDAgODUuNDkgMCAxMTJ2Mjg4YzAgMjYuNTEgMjEuNDkgNDggNDggNDhoNDE2YzI2LjUxIDAgNDgtMjEuNDkgNDgtNDhWMTEyYzAtMjYuNTEtMjEuNDktNDgtNDgtNDh6bS02IDMzNkg1NGE2IDYgMCAwIDEtNi02VjExOGE2IDYgMCAwIDEgNi02aDQwNGE2IDYgMCAwIDEgNiA2djI3NmE2IDYgMCAwIDEtNiA2ek0xMjggMTUyYy0yMi4wOTEgMC00MCAxNy45MDktNDAgNDBzMTcuOTA5IDQwIDQwIDQwIDQwLTE3LjkwOSA0MC00MC0xNy45MDktNDAtNDAtNDB6TTk2IDM1MmgzMjB2LTgwbC04Ny41MTUtODcuNTE1Yy00LjY4Ni00LjY4Ni0xMi4yODQtNC42ODYtMTYuOTcxIDBMMTkyIDMwNGwtMzkuNTE1LTM5LjUxNWMtNC42ODYtNC42ODYtMTIuMjg0LTQuNjg2LTE2Ljk3MSAwTDk2IDMwNHY0OHoiIGZpbGw9IiM5MDkwOTAiLz48L3N2Zz4=";
                 i.removeAttribute("style");
               });
           });
@@ -426,14 +423,9 @@ export default {
     },
     handleReplyCreated(event) {
       if (event) {
-        if (
-          !Object.keys(this.$store.state.microsoft.presences).includes(
-            event.from.user.id
-          )
-        )
-          this.$store.state.microsoft.presences[event.from.user.id] =
-            UserPresences.PresenceUnknown;
-
+        if (!Object.keys(this.presences).includes(event.from.user.id))
+          this.presences[event.from.user.id] =
+            PresenceAvailabilities.PresenceUnknown;
         this.replies.push(event);
       }
     },
@@ -454,7 +446,6 @@ export default {
       this.loadReplies().then(() => {
         this.$emit("loaded");
       });
-
     this.formatMentions();
   }
 };

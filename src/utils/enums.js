@@ -1,4 +1,4 @@
-export const MicrosoftGraphStatus = Object.freeze({
+export const MicrosoftStatus = Object.freeze({
   LoggedOut: "LoggedOut",
   LoggingIn: "LoggingIn",
   LoggedIn: "LoggedIn",
@@ -9,7 +9,7 @@ export const MicrosoftGraphStatus = Object.freeze({
   Unauthorized: "Unauthorized"
 });
 
-export const UserPresences = Object.freeze({
+export const PresenceAvailabilities = Object.freeze({
   Available: { value: "Available", colorVariant: "success" },
   AvailableIdle: { value: "AvailableIdle", colorVariant: "success" },
   Away: { value: "Away", colorVariant: "warning" },
