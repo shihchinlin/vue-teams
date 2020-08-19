@@ -159,7 +159,7 @@ export default {
   methods: {
     async loadChannel() {
       this.isLoaded = false;
-      if (this.status !== MicrosoftStatus.LoggedIn)
+      if (this.$store.state.microsoft.status !== MicrosoftStatus.LoggedIn)
         await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
           tenantId: this.tenantId,
           clientId: this.clientId,

@@ -341,6 +341,7 @@ export default {
           i.classList.add("badge-secondary");
           i.classList.add("badge-pill");
           i.classList.add("text-light");
+          i.classList.add("text-nowrap");
           i.classList.add("cursor-pointer");
           i.addEventListener("click", () => {
             this.mention("member", {
@@ -364,6 +365,7 @@ export default {
             i.classList.add("badge-secondary");
             i.classList.add("badge-pill");
             i.classList.add("text-light");
+            i.classList.add("text-nowrap");
             i.classList.add("cursor-pointer");
             i.addEventListener("click", () => {
               this.focusCard(cardName);

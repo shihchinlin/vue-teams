@@ -66,12 +66,12 @@ export default {
         event.dataTransfer.setDragImage(this.card_thumbnail, 10, 10);
         event.dataTransfer.effectAllowed = "link";
         event.dataTransfer.dropEffect = "link";
-        if (this.$store.state.card)
+        if (this.$store.hasModule("card"))
           this.$store.commit("card/TOGGLE_DRAGGING", true);
       }
     },
     handleCardDragEnd(event, card) {
-      if (this.$store.state.card)
+      if (this.$store.hasModule("card"))
         this.$store.commit("card/TOGGLE_DRAGGING", false);
     }
   },
@@ -98,6 +98,22 @@ export default {
 
 <style lang="scss">
 div.card-wrapper {
+  &.mask-wrapper {
+    position: relative;
+
+    > .mask {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      z-index: 999;
+      background-color: rgba(0, 0, 0, 0);
+    }
+  }
+
   &.hovered {
     box-shadow: map-get($shadow, "box_hovered");
   }

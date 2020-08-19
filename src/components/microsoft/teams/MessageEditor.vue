@@ -447,7 +447,7 @@ export default {
         "^" + location.origin + process.env.BASE_URL.slice(0, -1) + ".*#";
       mentionNodes = Array.from(
         contentNode.getElementsByTagName("a")
-      ).filter(i => i.href.match(new Regex(re)));
+      ).filter(i => i.href.match(new RegExp(re + ".*")));
       mentionNodes.forEach((mentionNode, mentionNodeIndex) => {
         const mentionCardName = decodeURI(mentionNode.href).split("#")[1];
         mentionNode.innerHTML =

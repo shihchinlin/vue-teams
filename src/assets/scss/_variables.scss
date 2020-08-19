@@ -51,7 +51,7 @@ $colors: (
   "cyan": $cyan,
   "white": $white,
   "gray": $gray,
-  "gray-light": $gray-light,
+  "gray-light": $gray-light
 );
 
 $theme-colors: (
@@ -63,7 +63,7 @@ $theme-colors: (
   "danger": $danger,
   "light": $light,
   "dark": $dark,
-  "white": $white,
+  "white": $white
 );
 
 $font-family-sans-serif: -apple-system, BlinkMacSystemFont, "Noto Sans TC",
@@ -77,19 +77,19 @@ $shadow: (
   "text": 0px 0px 4px $white,
   "box_hovered": (
     0px 0px 20px 0px transparentize($tone, 0.75),
-    0px 3px 6px 0px transparentize($secondary, 0.5),
+    0px 3px 6px 0px transparentize($secondary, 0.5)
   ),
   "box_focused": (
     0px 0px 8px 0px transparentize($danger, 0.25),
-    0px 3px 6px 0px transparentize($secondary, 0.25),
+    0px 3px 6px 0px transparentize($secondary, 0.25)
   ),
   "component_hovered": (
-    0px 0px 3px 1px transparentize($secondary, 0.25),
+    0px 0px 3px 1px transparentize($secondary, 0.25)
   ),
   "component_focused": (
-    0px 0px 3px 1px transparentize($danger, 0.25),
+    0px 0px 3px 1px transparentize($danger, 0.25)
   ),
-  "separator": transparentize($dark, 0.8),
+  "separator": transparentize($dark, 0.8)
 );
 
 // Body
