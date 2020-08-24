@@ -82,7 +82,7 @@
         >
           <b-button
             class="text-dark"
-            variant="white"
+            variant="transparent"
             v-if="
               message.from.user.id === $store.state.microsoft.me.id &&
                 !isDeleteConfirmed &&
@@ -94,7 +94,7 @@
           </b-button>
           <b-button
             :class="isDeleteConfirmed ? 'text-danger' : 'text-dark'"
-            variant="white"
+            variant="transparent"
             v-if="message.from.user.id === $store.state.microsoft.me.id"
             @click="deleteMessage()"
             @blur="isDeleteConfirmed = false"

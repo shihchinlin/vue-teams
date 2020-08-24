@@ -35,7 +35,14 @@
       </Intersect>
     </div>
     <Spinner v-if="!isChannelLoaded" />
+    <div
+      class="message my-5 clearfix animated fadeIn text-center text-light"
+      v-if="messages.length <= 0"
+    >
+      <i class="fa fa-comment-slash fa-5x"></i>
+    </div>
     <Message
+      ref="message"
       :teamId="teamId"
       :channelId="channelId"
       :message="message"
@@ -195,13 +202,15 @@ export default {
         !this.messageIterator.isComplete() &&
         this.isChannelLoaded
       ) {
-        let scrollBottom =
-          this.$refs["channel"].$el.scrollHeight -
-          this.$refs["channel"].$el.scrollTop;
+        let messageElements = this.$refs["channel"].$el.getElementsByClassName(
+          "message"
+        );
+        let lastSeenMessage =
+          messageElements.length > 0 ? messageElements[0] : undefined;
         this.isChannelLoaded = false;
         this.messageIterator.resume();
         setTimeout(() => {
-          this.$emit("scroll-to", scrollBottom);
+          if (lastSeenMessage) lastSeenMessage.scrollIntoView();
           this.isChannelLoaded = true;
         }, 3000);
       }

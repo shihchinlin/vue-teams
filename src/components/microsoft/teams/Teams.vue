@@ -33,7 +33,6 @@
       v-if="!showingModal"
       @loaded="handleChannelLoaded($event, $refs['channel'].$refs['channel'])"
       @reset="scrollToTop($refs['channel'].$refs['channel'])"
-      @scroll-to="scrollFromBottomTo($refs['channel'].$refs['channel'], $event)"
       @mentioned="$refs['message_editor'].mention($event.type, $event.mention)"
     />
     <MessageEditor
@@ -74,7 +73,6 @@
         v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
         @loaded="handleChannelLoaded($event, $refs['channel_modal'])"
         @reset="scrollToTop($refs['channel_modal'])"
-        @scroll-to="scrollFromBottomTo($refs['channel_modal'], $event)"
         @mentioned="
           $refs['message_editor'].mention($event.type, $event.mention)
         "
@@ -185,19 +183,6 @@ export default {
             element.$refs["modal"].scrollHeight;
         }
       });
-    },
-    scrollFromBottomTo(element, scrollBottom) {
-      if (
-        element.$el &&
-        element.$el.classList &&
-        element.$el.classList.contains("ps")
-      ) {
-        element.update();
-        element.$el.scrollTop = element.$el.scrollHeight - scrollBottom;
-      } else if (element.modalId) {
-        element.$refs["modal"].scrollTop =
-          element.$refs["modal"].scrollHeight - scrollBottom;
-      }
     },
     handleChannelLoaded(event, element) {
       if (!this.isTeamsLoaded) this.scrollToBottom(element);
