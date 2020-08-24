@@ -26,7 +26,7 @@
     "core-js": "^3.6.5",
     "moment": "^2.27.0",
     "quill-mention": "^2.2.7",
-    "vue": "^2.6.11",
+    "vue": "^2.6.12",
     "vue-intersect": "^1.1.6",
     "vue-perfect-scrollbar": "^0.2.1",
     "vue-quill-editor": "^3.0.6",
@@ -43,7 +43,7 @@
     "gh-pages": "^3.1.0",
     "node-sass": "^4.14.1",
     "sass-loader": "^9.0.3",
-    "vue-template-compiler": "^2.6.11"
+    "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
     "root": true,
