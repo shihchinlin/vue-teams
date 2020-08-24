@@ -2,7 +2,6 @@
   <div
     :class="[
       'message-editor',
-      'position-relative',
       'mask-wrapper',
       isCardDragging ? 'droppable' : ''
     ]"
@@ -345,14 +344,13 @@ export default {
                 this.$emit("replied", res);
               });
               this.body.content = "";
-              this.opened = false;
+              this.$emit("reset");
             }
           }
         }
     },
     cancelMessageEdit() {
       this.body.content = "";
-      this.opened = false;
       if (this.isMentioningCard) this._toggleCardsSelection(false);
       this.$emit("reset");
     },

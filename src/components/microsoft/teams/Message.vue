@@ -2,6 +2,7 @@
   <div
     :class="[
       'message',
+      !isDeleted || isRecoverable || hasReplies ? 'my-2' : '',
       'clearfix',
       'animated',
       'fadeIn',
@@ -14,17 +15,27 @@
     <div
       :class="[
         'bg-light',
-        'rounded-top',
-        isReplying || (isInChannel && isMessageHovered) ? '' : 'rounded-bottom',
+        isReplyHeaderOmitted ? 'mt-n1' : '',
+        isMessageHovered || !isReplyHeaderOmitted ? 'rounded-top' : '',
+        isReplying || (isMessage && isMessageHovered) ? '' : 'rounded-bottom',
         'p-1',
         'border-left',
-        message.from.user.id === $store.state.microsoft.me.id
+        !isDeleted && message.from.user.id === $store.state.microsoft.me.id
           ? 'border-' + colorVariant
           : ''
       ]"
-      v-if="!isDeleted"
+      v-if="!isDeleted || isRecoverable || hasReplies"
     >
-      <div class="d-flex align-items-center mb-2 position-relative">
+      <!-- Header -->
+      <div
+        :class="[
+          'd-flex',
+          'align-items-center',
+          isReplyHeaderOmitted ? '' : 'mb-2',
+          'position-relative'
+        ]"
+        v-if="!isDeleted"
+      >
         <b-avatar
           class="d-flex mr-2"
           :variant="colorVariant"
@@ -37,6 +48,7 @@
               : 'secondary'
           "
           :text="formatNameInitials(message.from.user.displayName)"
+          v-if="!isReplyHeaderOmitted"
           @click="
             mention('member', {
               value: message.from.user.displayName,
@@ -44,7 +56,10 @@
             })
           "
         ></b-avatar>
-        <div class="d-flex flex-column align-items-start">
+        <div
+          class="d-flex flex-column align-items-start"
+          v-if="!isReplyHeaderOmitted"
+        >
           <div
             class="cursor-pointer"
             @click="
@@ -67,8 +82,7 @@
         >
           <b-button
             class="text-dark"
-            variant="transparent"
-            pill
+            variant="white"
             v-if="
               message.from.user.id === $store.state.microsoft.me.id &&
                 !isDeleteConfirmed &&
@@ -80,8 +94,7 @@
           </b-button>
           <b-button
             :class="isDeleteConfirmed ? 'text-danger' : 'text-dark'"
-            variant="transparent"
-            pill
+            variant="white"
             v-if="message.from.user.id === $store.state.microsoft.me.id"
             @click="deleteMessage()"
             @blur="isDeleteConfirmed = false"
@@ -96,6 +109,23 @@
           </b-button>
         </b-button-group>
       </div>
+      <div
+        class="d-flex align-items-center"
+        v-else-if="isRecoverable || hasReplies"
+      >
+        <b-avatar
+          class="d-flex mr-2"
+          variant="secondary"
+          text="刪"
+          v-if="!isReplyHeaderOmitted"
+        ></b-avatar>
+        <div class="d-flex flex-column align-items-start">
+          <div class="text-center text-muted font-italic">
+            已刪除此訊息。
+          </div>
+        </div>
+      </div>
+      <!-- Content -->
       <div>
         <div
           ref="content"
@@ -112,10 +142,9 @@
           v-else
           @reset="handleEditorReset"
         />
-        <!-- <pre>{{ message }}</pre> -->
-        <div class="replies" v-if="isInChannel">
+        <div class="replies" v-if="isMessage">
           <Message
-            class="reply my-2"
+            class="reply"
             :teamId="teamId"
             :channelId="channelId"
             :message="reply"
@@ -123,45 +152,19 @@
             :key="reply.id"
             @loaded="$emit('loaded')"
             @mentioned="mention($event.type, $event.mention)"
-            @refresh-replies="loadRepliesThrottled()"
+            @refresh="loadRepliesThrottled()"
           />
         </div>
       </div>
     </div>
-    <div
-      :class="[
-        'bg-light',
-        'rounded-top',
-        isReplying ? '' : 'rounded-bottom',
-        'p-1',
-        'border-left'
-      ]"
-      v-else-if="isRecoverable"
-    >
-      <div class="d-flex align-items-center mb-1">
-        <b-avatar class="d-flex mr-2" variant="secondary" text="刪"></b-avatar>
-        <div class="d-flex flex-column align-items-start">
-          <div class="text-center text-muted font-italic">
-            已刪除此訊息。
-          </div>
-        </div>
-      </div>
-      <div class="replies" v-if="isInChannel">
-        <Message
-          class="reply my-2"
-          :teamId="teamId"
-          :channelId="channelId"
-          :message="reply"
-          v-for="reply in replies"
-          :key="reply.id"
-          @loaded="$emit('loaded')"
-        />
-      </div>
-    </div>
+    <!-- Reply Editor -->
     <div
       class="w-100 cursor-pointer text-muted"
       v-if="
-        isInChannel && (!isDeleted || isRecoverable) && !isMobile && !isReplying
+        isMessage &&
+          (!isDeleted || isRecoverable || hasReplies) &&
+          !isMobile &&
+          !isReplying
       "
       @click="isReplying = true"
     >
@@ -174,7 +177,10 @@
       :channelId="channelId"
       :messageId="message.id"
       v-if="
-        isInChannel && (!isDeleted || isRecoverable) && !isMobile && isReplying
+        isMessage &&
+          (!isDeleted || isRecoverable || hasReplies) &&
+          !isMobile &&
+          isReplying
       "
       @replied="handleReplyCreated"
       @reset="isReplying = false"
@@ -191,11 +197,7 @@ import {
   formatDateTimeFromNow,
   formatNameInitials
 } from "../../../utils/utils";
-import {
-  listMessageReplies,
-  refreshPresences,
-  getHostedContent
-} from "../../../api/microsoft";
+import { listMessageReplies, getHostedContent } from "../../../api/microsoft";
 import MessageEditor from "./MessageEditor";
 
 export default {
@@ -241,8 +243,8 @@ export default {
 
       return contentNode.innerHTML;
     },
-    isInChannel() {
-      return this.$parent.$options.name === "Channel";
+    isMessage() {
+      return this.$parent.$el.classList.contains("vue-teams-channel");
     },
     isDeleted() {
       return this.message.deletedDateTime;
@@ -250,13 +252,39 @@ export default {
     isRecoverable() {
       return (
         this.isDeleted &&
-        (new Date(this.message.deletedDateTime) > new Date() - 3600000 ||
-          this.replies.filter(i => {
-            return (
-              i.deletedDateTime &&
-              new Date(i.deletedDateTime) > new Date() - 3600000
-            );
-          }).length)
+        new Date(this.message.deletedDateTime) > new Date() - 3600000
+      );
+    },
+    isReplyHeaderOmitted() {
+      if (!this.isMessage) {
+        let previousReplyIndex =
+          this.$parent.replies.findIndex(
+            reply => reply.id === this.message.id
+          ) - 1;
+        if (previousReplyIndex >= 0) {
+          return (
+            !this.$parent.replies[previousReplyIndex].deletedDateTime &&
+            this.$parent.replies[previousReplyIndex].from.user.id ===
+              this.message.from.user.id &&
+            Math.abs(
+              new Date(this.message.createdDateTime) -
+                new Date(
+                  this.$parent.replies[previousReplyIndex].createdDateTime
+                )
+            ) <= 600000
+          );
+        }
+      }
+      return false;
+    },
+    hasReplies() {
+      return (
+        this.replies.filter(reply => {
+          return (
+            !reply.deletedDateTime ||
+            new Date(reply.deletedDateTime) <= new Date() - 3600000
+          );
+        }).length > 0
       );
     },
     colorVariant() {
@@ -276,7 +304,6 @@ export default {
     formatDateTimeFromNow,
     formatNameInitials,
     loadReplies() {
-      //[TODO] check channel message is existed
       if (this.status === MicrosoftStatus.LoggedIn) {
         return listMessageReplies(
           this.teamId,
@@ -289,7 +316,7 @@ export default {
     },
     loadRepliesThrottled: _.throttle(function() {
       this.loadReplies();
-    }, 5000),
+    }, 3000),
     focusCard(cardName) {
       document
         .querySelectorAll(".card-wrapper .card[name='" + cardName + "']")
@@ -303,7 +330,7 @@ export default {
       });
     },
     mention(type, mention) {
-      if (this.isInChannel) {
+      if (this.isMessage) {
         this.isReplying = true;
         this.$nextTick(() => {
           if (this.$refs["reply_editor"])
@@ -415,6 +442,8 @@ export default {
                 i.src =
                   "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCA1MTIgNTEyIj48cGF0aCBkPSJNNDY0IDY0SDQ4QzIxLjQ5IDY0IDAgODUuNDkgMCAxMTJ2Mjg4YzAgMjYuNTEgMjEuNDkgNDggNDggNDhoNDE2YzI2LjUxIDAgNDgtMjEuNDkgNDgtNDhWMTEyYzAtMjYuNTEtMjEuNDktNDgtNDgtNDh6bS02IDMzNkg1NGE2IDYgMCAwIDEtNi02VjExOGE2IDYgMCAwIDEgNi02aDQwNGE2IDYgMCAwIDEgNiA2djI3NmE2IDYgMCAwIDEtNiA2ek0xMjggMTUyYy0yMi4wOTEgMC00MCAxNy45MDktNDAgNDBzMTcuOTA5IDQwIDQwIDQwIDQwLTE3LjkwOSA0MC00MC0xNy45MDktNDAtNDAtNDB6TTk2IDM1MmgzMjB2LTgwbC04Ny41MTUtODcuNTE1Yy00LjY4Ni00LjY4Ni0xMi4yODQtNC42ODYtMTYuOTcxIDBMMTkyIDMwNGwtMzkuNTE1LTM5LjUxNWMtNC42ODYtNC42ODYtMTIuMjg0LTQuNjg2LTE2Ljk3MSAwTDk2IDMwNHY0OHoiIGZpbGw9IiM5MDkwOTAiLz48L3N2Zz4=";
                 i.removeAttribute("style");
+                i.removeAttribute("height");
+                i.removeAttribute("width");
               });
           });
       }
@@ -434,17 +463,20 @@ export default {
     handleMouseOver(event) {
       event.stopPropagation();
       this.isMessageHovered = true;
-      if (!this.isInChannel && this.$parent.isMessageHovered)
+      if (this.isMessage) {
+        this.$emit("refresh");
+        this.loadRepliesThrottled();
+      } else {
         this.$parent.isMessageHovered = false;
-      if (this.isInChannel) this.loadRepliesThrottled();
-      else this.$emit("refresh-replies");
+        this.$emit("refresh");
+      }
     },
     handleMouseLeave(event) {
       this.isMessageHovered = false;
     }
   },
   mounted() {
-    if (this.isInChannel)
+    if (this.isMessage)
       this.loadReplies().then(() => {
         this.$emit("loaded");
       });

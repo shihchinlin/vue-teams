@@ -3,6 +3,7 @@ import { MSALAuthenticationProviderOptions } from "@microsoft/microsoft-graph-cl
 import * as MicrosoftGraphClient from "@microsoft/microsoft-graph-client";
 import store from "@/store";
 import { PresenceAvailabilities } from "../utils/enums";
+import PageIterator from "./PageIterator";
 
 const msalBaseConfig = {
   cache: {
@@ -194,12 +195,40 @@ export const listChannelMembers = async (teamId, channelId) => {
     .then(res => res.value);
 };
 
-export const listChannelMessages = async (teamId, channelId) => {
-  return await store.state.microsoft.graph.client
+export const listChannelMessagesIterator = async (
+  teamId,
+  channelId,
+  callback
+) => {
+  let res = await store.state.microsoft.graph.client
     .api(`/teams/${teamId}/channels/${channelId}/messages`)
+    .version("beta")
+    .get();
+  let pageIterator = new PageIterator(
+    store.state.microsoft.graph.client,
+    res,
+    callback
+  );
+  pageIterator.iterate();
+  return pageIterator;
+};
+
+export const listChannelMessages = async (teamId, channelId, top = null) => {
+  return await store.state.microsoft.graph.client
+    .api(
+      `/teams/${teamId}/channels/${channelId}/messages` +
+        (top ? `?$top=${top}` : "")
+    )
     .version("beta")
     .get()
     .then(res => res.value);
+};
+
+export const getMessage = async (teamId, channelId, messageId) => {
+  return await store.state.microsoft.graph.client
+    .api(`/teams/${teamId}/channels/${channelId}/messages/${messageId}`)
+    .version("beta")
+    .get();
 };
 
 export const listMessageReplies = async (teamId, channelId, messageId) => {

@@ -1,7 +1,6 @@
 <template>
   <div id="app" class="app">
     <Teams
-      class="teams"
       v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
       v-if="tenantId && clientId && redirectUri && teamId && channelId"
     />
@@ -142,13 +141,6 @@ $fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
   margin-right: auto;
   margin-left: auto;
   background-color: #fff;
-
-  > .teams {
-    width: 250px;
-    height: 100%;
-    float: right;
-    box-shadow: -2px 0px 2px 1px rgba(0, 0, 0, 0.2);
-  }
 
   > .config {
     width: calc(100% - 253px);

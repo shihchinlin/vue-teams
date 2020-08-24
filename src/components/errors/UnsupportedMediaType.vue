@@ -1,5 +1,5 @@
 <template>
-  <ErrorBase class="my-5">
+  <ErrorBase>
     <i class="fa fa-file-excel" slot="icon" />
     <span slot="header">Unsupported Media Type</span>
     <span slot="description">

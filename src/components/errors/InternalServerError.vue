@@ -1,5 +1,5 @@
 <template>
-  <ErrorBase class="my-5">
+  <ErrorBase>
     <i class="fa fa-wrench" slot="icon" />
     <span slot="header">Internal Server Error</span>
     <span slot="description">

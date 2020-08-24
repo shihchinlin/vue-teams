@@ -1,5 +1,5 @@
 <template>
-  <ErrorBase class="my-5">
+  <ErrorBase>
     <i class="fa fa-times-circle" slot="icon" />
     <span slot="header">Unauthorized</span>
     <span slot="description">

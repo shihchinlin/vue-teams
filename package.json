@@ -27,6 +27,7 @@
     "moment": "^2.27.0",
     "quill-mention": "^2.2.7",
     "vue": "^2.6.11",
+    "vue-intersect": "^1.1.6",
     "vue-perfect-scrollbar": "^0.2.1",
     "vue-quill-editor": "^3.0.6",
     "vue-spinner": "^1.0.4",

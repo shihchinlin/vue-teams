@@ -1,40 +1,41 @@
 <template>
-  <Spinner v-if="messages.length <= 0" />
-  <div
+  <VuePerfectScrollbar
     ref="channel"
-    class="channel p-2"
-    v-else
-    @mouseover="loadMessagesThrottled()"
+    class="vue-teams-channel p-2 mask-wrapper"
+    @mouseover="handleMouseOver"
   >
-    <div class="hr-desc">
-      <span
-        ><a
-          id="channel_info"
-          :href="
-            'https://teams.microsoft.com/l/channel/' +
-              encodeURI(channelId) +
-              '/' +
-              encodeURI(encodeURI(channel.displayName)) +
-              '?groupId=' +
-              teamId +
-              '&tenantId=' +
-              tenantId
-          "
-          target="_blank"
-          v-b-tooltip.hover="
-            '您目前在「' +
-              team.displayName +
-              '」團隊的「' +
-              channel.displayName +
-              '」頻道中。'
-          "
-        >
-          以Microsoft Teams開啟
-        </a>
-      </span>
+    <div class="mask" v-if="!isChannelLoaded" />
+    <div class="hr-desc" v-if="isChannelLoaded">
+      <Intersect @enter="loadMoreMessages()">
+        <span>
+          <a
+            id="channel_info"
+            :href="
+              'https://teams.microsoft.com/l/channel/' +
+                encodeURI(channelId) +
+                '/' +
+                encodeURI(encodeURI(channel.displayName)) +
+                '?groupId=' +
+                teamId +
+                '&tenantId=' +
+                tenantId
+            "
+            target="_blank"
+            v-b-tooltip.hover="
+              '您目前在「' +
+                team.displayName +
+                '」團隊的「' +
+                channel.displayName +
+                '」頻道中。'
+            "
+          >
+            以Microsoft Teams開啟
+          </a>
+        </span>
+      </Intersect>
     </div>
+    <Spinner v-if="!isChannelLoaded" />
     <Message
-      class="mt-3"
       :teamId="teamId"
       :channelId="channelId"
       :message="message"
@@ -43,21 +44,26 @@
       @loaded="emitEventDebounced('loaded')"
       @replied="handleMessageCreated"
       @mentioned="$emit('mentioned', $event)"
+      @refresh="getMessageThrottled(message)"
     />
-  </div>
+  </VuePerfectScrollbar>
 </template>
 
 <script>
 import _ from "lodash";
 import Vue from "vue";
 import { mapGetters, mapMutations } from "vuex";
+import VuePerfectScrollbar from "vue-perfect-scrollbar";
+import Intersect from "vue-intersect";
 
 import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
 import {
   getTeam,
   getChannel,
   refreshPresences,
-  listChannelMessages
+  listChannelMessages,
+  listChannelMessagesIterator,
+  getMessage
 } from "../../../api/microsoft";
 import Message from "./Message";
 import Spinner from "../../Spinner";
@@ -65,6 +71,8 @@ import Spinner from "../../Spinner";
 export default {
   name: "Channel",
   components: {
+    VuePerfectScrollbar,
+    Intersect,
     Message,
     Spinner
   },
@@ -79,7 +87,10 @@ export default {
     return {
       team: {},
       channel: {},
-      messages: []
+      messages: [],
+      messageIterator: null,
+      isChannelLoaded: false,
+      batchSize: 10
     };
   },
   computed: {
@@ -94,6 +105,8 @@ export default {
     }),
     loadChannel() {
       if (this.status === MicrosoftStatus.LoggedIn) {
+        this.isChannelLoaded = false;
+        this.messageIterator = null;
         this.messages = [];
         this.$emit("reset");
         getTeam(this.teamId)
@@ -127,37 +140,103 @@ export default {
     },
     loadMessages() {
       if (this.status === MicrosoftStatus.LoggedIn) {
-        return listChannelMessages(this.teamId, this.channelId).then(
-          messages => {
-            for (let message of messages) {
-              if (
-                message.from &&
-                !Object.keys(this.presences).includes(message.from.user.id)
-              )
-                this.presences[message.from.user.id] =
-                  PresenceAvailabilities.PresenceUnknown;
-            }
-            refreshPresences();
-            this.messages = messages.reverse();
-            /*this.messages = messages.sort((a, b) => {
-              return (
-                Date.parse(a.createdDateTime) - Date.parse(b.createdDateTime)
-              );
-            });*/
+        let count = 0;
+        let callback = incomingMessage => {
+          if (incomingMessage.from)
+            this.refreshPresences(incomingMessage.from.user.id);
+
+          let lookup = this.messages.findIndex(
+            message => message.id === incomingMessage.id
+          );
+          if (lookup >= 0) this.$set(this.messages, lookup, incomingMessage);
+          else this.messages.unshift(incomingMessage);
+          count++;
+          if (count === this.batchSize) {
+            count = 0;
+            return false;
           }
-        );
+          return true;
+        };
+        return listChannelMessagesIterator(
+          this.teamId,
+          this.channelId,
+          callback
+        ).then(res => {
+          this.messageIterator = res;
+          setTimeout(() => {
+            this.isChannelLoaded = true;
+          }, 3000);
+        });
       } else return Promise.reject();
     },
-    loadMessagesThrottled: _.throttle(function() {
-      this.loadMessages();
-    }, 5000),
-    handleMessageCreated(event) {
-      if (!Object.keys(this.presences).includes(event.from.user.id))
-        this.presences[event.from.user.id] =
-          PresenceAvailabilities.PresenceUnknown;
-      refreshPresences();
+    refreshMessages() {
+      if (this.status === MicrosoftStatus.LoggedIn) {
+        return listChannelMessages(
+          this.teamId,
+          this.channelId,
+          this.batchSize
+        ).then(messages => {
+          for (let incomingMessage of messages) {
+            if (incomingMessage.from)
+              this.refreshPresences(incomingMessage.from.user.id);
 
-      this.messages.push(event);
+            let lookup = this.messages.findIndex(
+              message => message.id === incomingMessage.id
+            );
+            if (lookup >= 0) this.$set(this.messages, lookup, incomingMessage);
+            else this.messages.push(incomingMessage);
+          }
+        });
+      } else return Promise.reject();
+    },
+    loadMoreMessages() {
+      if (
+        this.messageIterator &&
+        !this.messageIterator.isComplete() &&
+        this.isChannelLoaded
+      ) {
+        let scrollBottom =
+          this.$refs["channel"].$el.scrollHeight -
+          this.$refs["channel"].$el.scrollTop;
+        this.isChannelLoaded = false;
+        this.messageIterator.resume();
+        setTimeout(() => {
+          this.$emit("scroll-to", scrollBottom);
+          this.isChannelLoaded = true;
+        }, 3000);
+      }
+    },
+    getMessage(message) {
+      if (this.status === MicrosoftStatus.LoggedIn) {
+        return getMessage(this.teamId, this.channelId, message.id).then(
+          incomingMessage => {
+            let messageIndex = this.messages.indexOf(message);
+            if (messageIndex > 0)
+              this.$set(this.messages, messageIndex, incomingMessage);
+          }
+        );
+      }
+    },
+    refreshPresences(id) {
+      if (!Object.keys(this.presences).includes(id))
+        this.presences[id] = PresenceAvailabilities.PresenceUnknown;
+      this.refreshPresencesThrottled();
+    },
+    refreshMessagesThrottled: _.throttle(function() {
+      this.refreshMessages();
+    }, 5000),
+    getMessageThrottled: _.throttle(function(message) {
+      this.getMessage(message);
+    }, 3000),
+    refreshPresencesThrottled: _.throttle(function() {
+      refreshPresences();
+    }, 2000),
+    handleMessageCreated(message) {
+      this.refreshPresences(message.from.user.id);
+      this.messages.push(message);
+    },
+    handleMouseOver(event) {
+      this.refreshMessagesThrottled();
     },
     emitEventDebounced: _.debounce(function(event) {
       this.$emit(event);

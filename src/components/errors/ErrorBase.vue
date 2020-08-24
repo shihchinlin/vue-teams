@@ -1,5 +1,5 @@
 <template>
-  <div class="error clearfix w-75 mx-auto">
+  <div class="error clearfix mx-auto px-3 py-5 vue-teams">
     <div class="icon text-dark float-sm-left mx-auto text-center mr-sm-3">
       <slot name="icon"></slot>
     </div>

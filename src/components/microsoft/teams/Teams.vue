@@ -1,5 +1,8 @@
 <template>
-  <Spinner v-if="$store.state.microsoft.status === MicrosoftStatus.LoggingIn" />
+  <Spinner
+    class="vue-teams"
+    v-if="$store.state.microsoft.status === MicrosoftStatus.LoggingIn"
+  />
   <Forbidden
     v-else-if="$store.state.microsoft.status === MicrosoftStatus.Forbidden"
   />
@@ -20,72 +23,30 @@
     v-else-if="$store.state.microsoft.status === MicrosoftStatus.Unauthorized"
   />
   <div
-    v-else-if="
-      $store.state.microsoft.status === MicrosoftStatus.LoggedIn && isLoaded
-    "
-    class="discuss position-relative"
+    v-else-if="$store.state.microsoft.status === MicrosoftStatus.LoggedIn"
+    ref="channel_side"
+    class="vue-teams channel-side position-relative"
   >
-    <VuePerfectScrollbar
-      ref="channel_wrapper"
-      class="channel-wrapper"
+    <Channel
+      ref="channel"
+      v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
       v-if="!showingModal"
-    >
-      <Channel
-        ref="channel"
-        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-        @loaded="scrollToBottom($refs['channel_wrapper'])"
-        @reset="scrollToTop($refs['channel_wrapper'])"
-        @mentioned="
-          $refs['message_editor'].mention($event.type, $event.mention)
-        "
-      />
-    </VuePerfectScrollbar>
+      @loaded="handleChannelLoaded($event, $refs['channel'].$refs['channel'])"
+      @reset="scrollToTop($refs['channel'].$refs['channel'])"
+      @scroll-to="scrollFromBottomTo($refs['channel'].$refs['channel'], $event)"
+      @mentioned="$refs['message_editor'].mention($event.type, $event.mention)"
+    />
     <MessageEditor
       ref="message_editor"
-      v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-      :default_opened="true"
       class="channel fixed"
+      v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
       v-if="!showingModal"
       @replied="
         $refs['channel'].loadMessages().then(() => {
-          scrollToBottom($refs['channel_wrapper']);
+          scrollToBottom($refs['channel'].$refs['channel']);
         })
       "
     />
-    <b-modal
-      ref="discuss_modal"
-      v-model="showingModal"
-      modal-class="discuss-modal"
-      size="lg"
-      centered
-      hide-header
-      hide-footer
-    >
-      <Channel
-        ref="channel"
-        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-        @loaded="
-          (showingMessageEditorInModal = true) &&
-            scrollToBottom($refs['discuss_modal'])
-        "
-        @reset="scrollToTop($refs['discuss_modal'])"
-        @mentioned="
-          $refs['message_editor'].mention($event.type, $event.mention)
-        "
-      />
-      <MessageEditor
-        ref="message_editor"
-        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-        :default_opened="true"
-        class="channel fixed"
-        v-if="showingMessageEditorInModal"
-        @replied="
-          $refs['channel'].loadMessages().then(() => {
-            scrollToBottom($refs['discuss_modal']);
-          })
-        "
-      />
-    </b-modal>
     <b-button
       class="action d-sm-down-none position-absolute"
       variant="white"
@@ -97,12 +58,43 @@
     >
       <i class="fa fa-expand"></i>
     </b-button>
+    <b-modal
+      ref="channel_modal"
+      v-model="showingModal"
+      modal-class="channel-modal"
+      size="lg"
+      centered
+      hide-header
+      hide-footer
+      @show="isTeamsLoaded = false"
+      @hidden="isTeamsLoaded = false"
+    >
+      <Channel
+        ref="channel"
+        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
+        @loaded="handleChannelLoaded($event, $refs['channel_modal'])"
+        @reset="scrollToTop($refs['channel_modal'])"
+        @scroll-to="scrollFromBottomTo($refs['channel_modal'], $event)"
+        @mentioned="
+          $refs['message_editor'].mention($event.type, $event.mention)
+        "
+      />
+      <MessageEditor
+        ref="message_editor"
+        class="channel fixed"
+        v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
+        @replied="
+          $refs['channel'].loadMessages().then(() => {
+            scrollToBottom($refs['channel_modal']);
+          })
+        "
+      />
+    </b-modal>
   </div>
-  <UnsupportedMediaType v-else-if="!isLoaded" />
+  <UnsupportedMediaType v-else-if="!isTeamsLoaded" />
 </template>
 
 <script>
-import VuePerfectScrollbar from "vue-perfect-scrollbar";
 import modules from "../../../store/modules";
 
 import Forbidden from "../../errors/Forbidden";
@@ -119,7 +111,6 @@ import Spinner from "../../Spinner";
 
 export default {
   components: {
-    VuePerfectScrollbar,
     Forbidden,
     GatewayTimeout,
     InternalServerError,
@@ -142,7 +133,7 @@ export default {
       MicrosoftStatus: MicrosoftStatus,
       showingModal: false,
       showingMessageEditorInModal: false,
-      isLoaded: true
+      isTeamsLoaded: true
     };
   },
   computed: {
@@ -158,14 +149,27 @@ export default {
   },
   methods: {
     async loadChannel() {
-      this.isLoaded = false;
+      this.isTeamsLoaded = false;
       if (this.$store.state.microsoft.status !== MicrosoftStatus.LoggedIn)
         await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
           tenantId: this.tenantId,
           clientId: this.clientId,
           redirectUri: this.redirectUri
         });
-      this.isLoaded = true;
+    },
+    scrollToTop(element) {
+      this.$nextTick(() => {
+        if (
+          element.$el &&
+          element.$el.classList &&
+          element.$el.classList.contains("ps")
+        ) {
+          element.update();
+          element.$el.scrollTop = 0;
+        } else if (element.modalId) {
+          element.$refs["modal"].scrollTop = 0;
+        }
+      });
     },
     scrollToBottom(element) {
       this.$nextTick(() => {
@@ -182,19 +186,24 @@ export default {
         }
       });
     },
-    scrollToTop(element) {
-      this.$nextTick(() => {
-        if (
-          element.$el &&
-          element.$el.classList &&
-          element.$el.classList.contains("ps")
-        ) {
-          element.update();
-          element.$el.scrollTop = 0;
-        } else if (element.modalId) {
-          element.$refs["modal"].scrollTop = 0;
-        }
-      });
+    scrollFromBottomTo(element, scrollBottom) {
+      if (
+        element.$el &&
+        element.$el.classList &&
+        element.$el.classList.contains("ps")
+      ) {
+        element.update();
+        element.$el.scrollTop = element.$el.scrollHeight - scrollBottom;
+      } else if (element.modalId) {
+        element.$refs["modal"].scrollTop =
+          element.$refs["modal"].scrollHeight - scrollBottom;
+      }
+    },
+    handleChannelLoaded(event, element) {
+      if (!this.isTeamsLoaded) this.scrollToBottom(element);
+      setTimeout(() => {
+        this.isTeamsLoaded = true;
+      }, 5000);
     }
   },
   created() {
@@ -215,25 +224,32 @@ export default {
 </script>
 
 <style lang="scss">
-.teams {
-  .channel-wrapper {
-    height: calc(100% - 1px - 150px);
+.vue-teams {
+  width: 250px;
+  height: 100%;
+  float: right;
+  box-shadow: -2px 0px 2px 1px rgba(0, 0, 0, 0.2);
+
+  &.channel-side {
+    > .vue-teams-channel {
+      height: calc(100% - 1px - 150px) !important;
+    }
+
+    > .action {
+      bottom: 8px;
+      left: 8px;
+      z-index: 1030;
+      box-shadow: map-get($shadow, "component_hovered");
+    }
   }
 
-  > .action {
-    bottom: 8px;
-    left: 8px;
-    z-index: 1030;
-    box-shadow: map-get($shadow, "component_hovered");
-  }
-}
+  &.error .icon {
+    float: none !important;
+    margin-right: auto !important;
 
-.error .icon {
-  float: none !important;
-  margin-right: auto !important;
-
-  + div .h3 {
-    text-align: center !important;
+    + div .h3 {
+      text-align: center !important;
+    }
   }
 }
 </style>
