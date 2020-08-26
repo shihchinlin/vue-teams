@@ -7,14 +7,15 @@ module.exports = {
       entry: "src/main.js",
       template: "public/index.html",
       filename: "index.html",
-      title: "VueTeams",
-    },
+      title: "VueTeams"
+    }
   },
   css: {
     loaderOptions: {
       sass: {
-        additionalData: `@import "~@/assets/scss/prepend.scss";`,
-      },
-    },
+        additionalData: `@import "~@/assets/scss/prepend.scss";`
+      }
+    }
   },
+  transpileDependencies: ["@microsoft/microsoft-graph-client"]
 };

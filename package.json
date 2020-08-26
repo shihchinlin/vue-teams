@@ -1,7 +1,7 @@
 {
   "name": "vue-teams",
   "description": "VueTeams is a component for integrating Microsoft Teams channel into your own project, based on Vue, BootstrapVue, Microsoft Authentication Library and Microsoft Graph API.",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "main": "./src/index.js",
   "scripts": {
     "serve": "vue-cli-service serve --open",
@@ -19,7 +19,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@azure/msal-browser": "^2.0.2",
+    "@azure/msal-browser": "^2.1.0",
     "@fortawesome/fontawesome-free": "^5.14.0",
     "@microsoft/microsoft-graph-client": "^2.0.0",
     "bootstrap-vue": "^2.16.0",
@@ -41,6 +41,7 @@
     "eslint": "^6.7.2",
     "eslint-plugin-vue": "^6.2.2",
     "gh-pages": "^3.1.0",
+    "isomorphic-fetch": "^2.2.1",
     "node-sass": "^4.14.1",
     "sass-loader": "^9.0.3",
     "vue-template-compiler": "^2.6.12"
