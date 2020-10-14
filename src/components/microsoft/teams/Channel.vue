@@ -257,6 +257,20 @@ export default {
   watch: {
     teamId_channelId() {
       this.loadChannel();
+    },
+    isChannelLoaded: {
+      immediate: true,
+      handler() {
+        this.$nextTick(() => {
+          this.$refs["channel"].ps.settings.suppressScrollY = !this
+            .isChannelLoaded;
+          this.$refs["channel"].update();
+          console.log(
+            !this.isChannelLoaded,
+            this.$refs["channel"].ps.settings.suppressScrollY
+          );
+        });
+      }
     }
   }
 };
