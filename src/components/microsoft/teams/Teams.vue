@@ -1,7 +1,10 @@
 <template>
   <Spinner
     class="vue-teams"
-    v-if="$store.state.microsoft.status === MicrosoftStatus.LoggingIn"
+    v-if="
+      !$store.state.microsoft.status ||
+        $store.state.microsoft.status === MicrosoftStatus.LoggingIn
+    "
   />
   <Forbidden
     v-else-if="$store.state.microsoft.status === MicrosoftStatus.Forbidden"
@@ -22,6 +25,7 @@
   <Unauthorized
     v-else-if="$store.state.microsoft.status === MicrosoftStatus.Unauthorized"
   />
+  <UnsupportedMediaType v-else-if="!teamId && !channelId" />
   <div
     v-else-if="$store.state.microsoft.status === MicrosoftStatus.LoggedIn"
     ref="channel_side"
@@ -30,7 +34,7 @@
     <Channel
       ref="channel"
       v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-      v-if="!showingModal"
+      v-if="!isShowingModal"
       @loaded="handleChannelLoaded($event, $refs['channel'].$refs['channel'])"
       @reset="scrollToTop($refs['channel'].$refs['channel'])"
       @mentioned="$refs['message_editor'].mention($event.type, $event.mention)"
@@ -39,33 +43,27 @@
       ref="message_editor"
       class="channel fixed"
       v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-      v-if="!showingModal"
-      @replied="
-        $refs['channel'].loadMessages().then(() => {
-          scrollToBottom($refs['channel'].$refs['channel']);
-        })
-      "
+      v-if="!isShowingModal"
+      @replied="$refs['channel'].loadMessages()"
     />
     <b-button
       class="action d-sm-down-none position-absolute"
       variant="white"
       pill
       v-b-tooltip.hover="'放大檢視'"
-      v-if="!showingModal"
-      @click="showingModal = true"
+      v-if="!isShowingModal"
+      @click="isShowingModal = true"
     >
       <i class="fa fa-expand"></i>
     </b-button>
     <b-modal
       ref="channel_modal"
-      v-model="showingModal"
+      v-model="isShowingModal"
       modal-class="channel-modal"
       size="lg"
       centered
       hide-header
       hide-footer
-      @show="isTeamsLoaded = false"
-      @hidden="isTeamsLoaded = false"
     >
       <Channel
         ref="channel"
@@ -80,15 +78,10 @@
         ref="message_editor"
         class="channel fixed"
         v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
-        @replied="
-          $refs['channel'].loadMessages().then(() => {
-            scrollToBottom($refs['channel_modal']);
-          })
-        "
+        @replied="$refs['channel'].loadMessages()"
       />
     </b-modal>
   </div>
-  <UnsupportedMediaType v-else-if="!isTeamsLoaded" />
 </template>
 
 <script>
@@ -128,9 +121,7 @@ export default {
   data: () => {
     return {
       MicrosoftStatus: MicrosoftStatus,
-      showingModal: false,
-      showingMessageEditorInModal: false,
-      isTeamsLoaded: true
+      isShowingModal: false
     };
   },
   computed: {
@@ -146,7 +137,6 @@ export default {
   },
   methods: {
     async loadChannel() {
-      this.isTeamsLoaded = false;
       if (this.$store.state.microsoft.status !== MicrosoftStatus.LoggedIn)
         await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
           tenantId: this.tenantId,
@@ -184,10 +174,7 @@ export default {
       });
     },
     handleChannelLoaded(event, element) {
-      if (!this.isTeamsLoaded) this.scrollToBottom(element);
-      setTimeout(() => {
-        this.isTeamsLoaded = true;
-      }, 5000);
+      this.scrollToBottom(element);
     }
   },
   created() {

@@ -5,12 +5,11 @@
     :settings="settingsPerfectScrollbar"
     @mouseover="handleMouseOver"
   >
-    <div class="mask" v-if="!isChannelLoaded" />
-    <div class="hr-desc" v-if="isChannelLoaded">
+    <div class="mask" v-if="isChannelLoading" />
+    <div class="hr-desc" v-if="!isChannelLoading">
       <Intersect @enter="loadMoreMessages()">
         <span>
           <a
-            id="channel_info"
             :href="
               'https://teams.microsoft.com/l/channel/' +
                 encodeURI(channelId) +
@@ -49,8 +48,7 @@
       :message="message"
       v-for="message in messages"
       :key="message.id"
-      @loaded="emitEventDebounced('loaded')"
-      @replied="handleMessageCreated"
+      @loaded="emitChannelLoadedDelayed('loaded')"
       @mentioned="$emit('mentioned', $event)"
       @refresh="getMessageThrottled(message)"
     />
@@ -98,6 +96,8 @@ export default {
       messages: [],
       messageIterator: null,
       isChannelLoaded: false,
+      isChannelLoading: false,
+      timerChannelLoadedEvent: null,
       batchSize: 10,
       settingsPerfectScrollbar: {
         maxScrollbarLength: 200,
@@ -120,6 +120,7 @@ export default {
     loadChannel() {
       if (this.status === MicrosoftStatus.LoggedIn) {
         this.isChannelLoaded = false;
+        this.isChannelLoading = true;
         this.messageIterator = null;
         this.messages = [];
         this.$emit("reset");
@@ -128,15 +129,7 @@ export default {
             this.team = team;
             getChannel(this.teamId, this.channelId).then(channel => {
               this.channel = channel;
-              return this.loadMessages().then(() => {
-                this.$nextTick(() => {
-                  this.$root.$emit("bv::show::tooltip", "channel_info");
-                  setTimeout(() => {
-                    this.$root.$emit("bv::hide::tooltip", "channel_info");
-                  }, 4000);
-                });
-                this.emitEventDebounced("loaded");
-              });
+              return this.loadMessages();
             });
           })
           .catch(error => {
@@ -163,7 +156,9 @@ export default {
             message => message.id === incomingMessage.id
           );
           if (lookup >= 0) this.$set(this.messages, lookup, incomingMessage);
-          else this.messages.unshift(incomingMessage);
+          else if (!this.isChannelLoaded || this.isChannelLoading)
+            this.messages.unshift(incomingMessage);
+          else this.messages.push(incomingMessage);
           count++;
           if (count === this.batchSize) {
             count = 0;
@@ -177,11 +172,34 @@ export default {
           callback
         ).then(res => {
           this.messageIterator = res;
-          setTimeout(() => {
-            this.isChannelLoaded = true;
-          }, 3000);
+          this.$nextTick(() => {
+            this.$emit("loaded");
+            this.$nextTick(() => {
+              this.isChannelLoading = false;
+            });
+          });
         });
       } else return Promise.reject();
+    },
+    loadMoreMessages() {
+      if (
+        this.messageIterator &&
+        !this.messageIterator.isComplete() &&
+        this.isChannelLoaded
+      ) {
+        this.isChannelLoading = true;
+        let messageElements = this.$refs["channel"].$el.getElementsByClassName(
+          "message"
+        );
+        let lastSeenMessage =
+          messageElements.length > 0 ? messageElements[0] : undefined;
+        this.messageIterator.resume().then(() => {
+          this.$nextTick(() => {
+            if (lastSeenMessage) lastSeenMessage.scrollIntoView();
+          });
+          this.isChannelLoading = false;
+        });
+      }
     },
     refreshMessages() {
       if (this.status === MicrosoftStatus.LoggedIn) {
@@ -202,25 +220,6 @@ export default {
           }
         });
       } else return Promise.reject();
-    },
-    loadMoreMessages() {
-      if (
-        this.messageIterator &&
-        !this.messageIterator.isComplete() &&
-        this.isChannelLoaded
-      ) {
-        let messageElements = this.$refs["channel"].$el.getElementsByClassName(
-          "message"
-        );
-        let lastSeenMessage =
-          messageElements.length > 0 ? messageElements[0] : undefined;
-        this.isChannelLoaded = false;
-        this.messageIterator.resume();
-        setTimeout(() => {
-          if (lastSeenMessage) lastSeenMessage.scrollIntoView();
-          this.isChannelLoaded = true;
-        }, 3000);
-      }
     },
     getMessage(message) {
       if (this.status === MicrosoftStatus.LoggedIn) {
@@ -247,16 +246,20 @@ export default {
     refreshPresencesThrottled: _.throttle(function() {
       refreshPresences();
     }, 2000),
-    handleMessageCreated(message) {
-      this.refreshPresences(message.from.user.id);
-      this.messages.push(message);
-    },
     handleMouseOver(event) {
       this.refreshMessagesThrottled();
     },
-    emitEventDebounced: _.debounce(function(event) {
-      this.$emit(event);
-    }, 500)
+    emitChannelLoadedDelayed() {
+      if (!this.isChannelLoaded) {
+        if (this.timerChannelLoadedEvent)
+          clearTimeout(this.timerChannelLoadedEvent);
+        this.timerChannelLoadedEvent = setTimeout(() => {
+          this.$emit("loaded");
+          this.isChannelLoaded = true;
+          this.timerChannelLoadedEvent = null;
+        }, 1000);
+      }
+    }
   },
   mounted() {
     if (this.teamId_channelId) this.loadChannel();
@@ -265,12 +268,13 @@ export default {
     teamId_channelId() {
       this.loadChannel();
     },
-    isChannelLoaded: {
+    isChannelLoading: {
       immediate: true,
       handler() {
         this.$nextTick(() => {
-          this.$refs["channel"].ps.settings.suppressScrollY = !this
-            .isChannelLoaded;
+          this.$refs[
+            "channel"
+          ].ps.settings.suppressScrollY = this.isChannelLoading;
           this.$refs["channel"].update();
         });
       }

@@ -303,7 +303,7 @@ export default {
       });
       return cards.filter(card => card.value.includes(keyword));
     },
-    sendMessage() {
+    async sendMessage() {
       if (this.status === MicrosoftStatus.LoggedIn)
         if (this.body.content !== "") {
           {
@@ -320,8 +320,8 @@ export default {
                 }
               );
             } else {
-              let api = this.messageId
-                ? replyToMessage(
+              let res = this.messageId
+                ? await replyToMessage(
                     this.teamId,
                     this.channelId,
                     this.messageId,
@@ -330,7 +330,7 @@ export default {
                       this.mentions
                     )
                   )
-                : sendMessage(
+                : await sendMessage(
                     this.teamId,
                     this.channelId,
                     this.transformMessageFromQuillToGraph(
@@ -338,9 +338,7 @@ export default {
                       this.mentions
                     )
                   );
-              api.then(res => {
-                this.$emit("replied", res);
-              });
+              await this.$emit("replied", res);
               this.body.content = "";
               this.$emit("reset");
             }
