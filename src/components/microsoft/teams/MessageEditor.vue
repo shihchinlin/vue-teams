@@ -18,7 +18,6 @@
     </VueQuillEditor>
     <b-button-group
       class="actions position-absolute p-2"
-      size="sm"
       @mouseover="toggleActions(true)"
       @mouseleave="toggleActions(false)"
     >
@@ -32,9 +31,8 @@
         pill
         v-b-tooltip.hover="'標註報表'"
         @click="toggleCardsSelection()"
-      >
-        <i class="fa fa-hashtag"></i>
-      </b-button>
+        ><i class="fa fa-hashtag"></i
+      ></b-button>
       <b-button
         :class="
           isActionsHovered ||
@@ -49,9 +47,8 @@
         pill
         v-b-tooltip.hover="'標註使用者'"
         @click="toggleMembersSelection()"
-      >
-        <i class="fa fa-at"></i>
-      </b-button>
+        ><i class="fa fa-at"></i
+      ></b-button>
       <b-button
         :class="
           isActionsHovered ||
@@ -68,9 +65,8 @@
         v-b-tooltip.hover="'取消'"
         :disabled="!Boolean(body.content)"
         @click="cancelMessageEdit()"
-      >
-        <i class="fa fa-times"></i>
-      </b-button>
+        ><i class="fa fa-times"></i
+      ></b-button>
       <b-button
         class="mx-1"
         variant="success"
@@ -78,11 +74,10 @@
         v-b-tooltip.hover="isEditingMessage ? '完成' : '傳送'"
         @click="sendMessage()"
         :disabled="body.content === ''"
-      >
-        <i
+        ><i
           :class="['fa', isEditingMessage ? 'fa-check' : 'fa-paper-plane']"
-        ></i>
-      </b-button>
+        ></i
+      ></b-button>
     </b-button-group>
     <!-- <pre>{{ message }}</pre> -->
   </div>
@@ -175,7 +170,8 @@ export default {
             mentionContainerClass: "ql-mention-list-container",
             mentionListClass: "ql-mention-list list-group",
             listItemClass:
-              "ql-mention-list-item list-group-item list-group-item-action p-2"
+              "ql-mention-list-item list-group-item list-group-item-action p-2",
+            positioningStrategy: "fixed"
           }
         }
       };
@@ -240,9 +236,11 @@ export default {
           ] +
           ' rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span>' +
           formatNameInitials(item.value) +
-          '</span></span></span><div class="d-flex flex-column align-items-start"> ' +
+          '</span></span></span><div class="d-flex flex-column align-items-start text-truncate" style="width: 150px;""> ' +
           item.value +
-          ' <small class="d-block text-muted"> ' +
+          ' <small class="d-block text-muted text-truncate" style="width: 150px;" title="' +
+          (item.email ? item.email : item.mentionedUserId) +
+          '"> ' +
           (item.email ? item.email : item.mentionedUserId) +
           " </small></div></div>"
         );
@@ -250,7 +248,7 @@ export default {
         return (
           '<div class="d-flex align-items-center"><span class="b-avatar mr-2 badge-secondary rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span class="fa fa-chart-bar"></span></span></span><div class="d-flex flex-column align-items-start text-truncate" style="width: 150px;"> ' +
           item.value +
-          ' <small class="d-block text-muted text-truncate" style="width: 150px;"  title="' +
+          ' <small class="d-block text-muted text-truncate" style="width: 150px;" title="' +
           decodeURIComponent(location.pathname) +
           '"> ' +
           decodeURIComponent(location.pathname) +

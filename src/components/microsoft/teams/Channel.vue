@@ -2,6 +2,7 @@
   <VuePerfectScrollbar
     ref="channel"
     class="vue-teams-channel p-2 mask-wrapper"
+    :settings="settingsPerfectScrollbar"
     @mouseover="handleMouseOver"
   >
     <div class="mask" v-if="!isChannelLoaded" />
@@ -97,7 +98,13 @@ export default {
       messages: [],
       messageIterator: null,
       isChannelLoaded: false,
-      batchSize: 10
+      batchSize: 10,
+      settingsPerfectScrollbar: {
+        maxScrollbarLength: 200,
+        minScrollbarLength: 40,
+        suppressScrollX: true,
+        suppressScrollY: false
+      }
     };
   },
   computed: {

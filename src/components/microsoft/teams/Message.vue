@@ -76,7 +76,6 @@
           </small>
         </div>
         <b-button-group
-          size="sm"
           class="actions position-absolute"
           v-if="isMessageHovered"
         >
@@ -340,18 +339,18 @@ export default {
       } else this.$emit("mentioned", { type: type, mention: mention });
     },
     deleteMessage() {
+      this.$bvToast.toast(
+        "Microsoft Graph API目前尚不支援刪除訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行刪除。",
+        {
+          title: "尚未支援刪除討論訊息",
+          variant: "warning",
+          noAutoHide: true,
+          autoHideDelay: 3000,
+          dismissible: true,
+          toaster: "b-toaster-bottom-right"
+        }
+      );
       if (this.isDeleteConfirmed) {
-        this.$bvToast.toast(
-          "Microsoft Graph API目前尚不支援刪除訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行刪除。",
-          {
-            title: "尚未支援刪除討論訊息",
-            variant: "warning",
-            noAutoHide: true,
-            autoHideDelay: 3000,
-            dismissible: true,
-            toaster: "b-toaster-bottom-right"
-          }
-        );
         this.isDeleteConfirmed = false;
       } else {
         this.isDeleteConfirmed = true;
@@ -481,6 +480,22 @@ export default {
         this.$emit("loaded");
       });
     this.formatMentions();
+  },
+  watch: {
+    isEditing() {
+      if (this.isEditing)
+        this.$bvToast.toast(
+          "Microsoft Graph API目前尚不支援編輯訊息功能，請開啟Microsoft Teams桌面版或網頁版客戶端執行編輯。",
+          {
+            title: "尚未支援編輯討論訊息",
+            variant: "warning",
+            noAutoHide: true,
+            autoHideDelay: 3000,
+            dismissible: true,
+            toaster: "b-toaster-bottom-right"
+          }
+        );
+    }
   }
 };
 </script>

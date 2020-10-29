@@ -82,6 +82,7 @@
 
       > .btn {
         padding: 0rem 0.25rem;
+        font-size: 14px;
       }
     }
   }
@@ -141,7 +142,6 @@
 
       .ql-container {
         border: 0 !important;
-        font-family: $font-family-sans-serif !important;
         font-family: inherit !important;
 
         .ql-editor {
@@ -185,27 +185,6 @@
             content: "\f080";
           }
         }
-
-        .ql-mention-list-container {
-          max-height: 640px;
-          overflow-y: auto;
-          border-radius: 0.25rem;
-          box-shadow: map-get($shadow, "box_hovered");
-          z-index: 1;
-
-          .ql-mention-list {
-            margin-bottom: 0;
-
-            .ql-mention-list-item {
-              cursor: pointer;
-
-              &.selected {
-                color: #616161;
-                background-color: #f5f5f5;
-              }
-            }
-          }
-        }
       }
     }
 
@@ -215,11 +194,15 @@
       opacity: 0.75;
 
       .btn {
+        width: calc(14px + 0.9rem + 2px);
+        padding: 0.45rem;
+        font-size: 14px;
+        line-height: 14px !important;
         transition-property: color, margin-right;
         box-shadow: map-get($shadow, "component_hovered");
 
         > i {
-          width: 14px;
+          line-height: 14px !important;
         }
       }
 
@@ -248,5 +231,27 @@
 
   .message-editor.reply {
     border-bottom: 3px solid;
+  }
+}
+
+body > .ql-mention-list-container {
+  max-height: 640px;
+  overflow-y: auto;
+  border-radius: 0.25rem;
+  box-shadow: map-get($shadow, "box_hovered");
+  z-index: 1060;
+  font-size: 14px;
+
+  .ql-mention-list {
+    margin-bottom: 0;
+
+    .ql-mention-list-item {
+      cursor: pointer;
+
+      &.selected {
+        color: #616161;
+        background-color: #f5f5f5;
+      }
+    }
   }
 }

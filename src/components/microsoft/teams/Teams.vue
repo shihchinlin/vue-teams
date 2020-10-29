@@ -49,7 +49,6 @@
     <b-button
       class="action d-sm-down-none position-absolute"
       variant="white"
-      size="sm"
       pill
       v-b-tooltip.hover="'放大檢視'"
       v-if="!showingModal"
@@ -220,11 +219,19 @@ export default {
       height: calc(100% - 1px - 150px) !important;
     }
 
-    > .action {
+    > .action.btn {
       bottom: 8px;
       left: 8px;
       z-index: 1030;
+      width: calc(14px + 0.9rem + 2px);
+      padding: 0.45rem;
+      font-size: 14px;
+      line-height: 14px !important;
       box-shadow: map-get($shadow, "component_hovered");
+
+      > i {
+        line-height: 14px !important;
+      }
     }
   }
 
