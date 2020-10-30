@@ -2,7 +2,11 @@
   <div
     :class="[
       'message',
-      !isDeleted || isRecoverable || hasReplies ? 'my-2' : '',
+      !isDeleted || isRecoverable || hasReplies
+        ? hasReactions
+          ? 'my-3'
+          : 'my-2'
+        : '',
       'clearfix',
       'animated',
       'fadeIn',
@@ -76,14 +80,39 @@
           </small>
         </div>
         <b-button-group
-          class="actions position-absolute"
-          v-if="isMessageHovered"
+          :class="[
+            'actions',
+            'position-absolute',
+            isReplyHeaderOmitted ? 'no-header' : ''
+          ]"
+          v-if="isMessageHovered || true"
         >
-          <b-button
+          <template v-for="reaction in Object.keys(MessageReactions)">
+            <b-button
+              :class="'text-' + MessageReactions[reaction].colorVariant"
+              variant="transparent"
+              v-if="
+                message.reactions &&
+                  message.reactions.filter(
+                    i => i.reactionType === reaction.toLowerCase()
+                  ).length
+              "
+              :key="reaction"
+            >
+              <i :class="MessageReactions[reaction].icon" />
+              {{
+                message.reactions.filter(
+                  i => i.reactionType === reaction.toLowerCase()
+                ).length
+              }}
+            </b-button>
+          </template>
+          <!-- <b-button
             class="text-dark"
             variant="transparent"
             v-if="
-              message.from.user.id === $store.state.microsoft.me.id &&
+              isMessageHovered &&
+                message.from.user.id === $store.state.microsoft.me.id &&
                 !isDeleteConfirmed &&
                 !isEditing
             "
@@ -94,7 +123,10 @@
           <b-button
             :class="isDeleteConfirmed ? 'text-danger' : 'text-dark'"
             variant="transparent"
-            v-if="message.from.user.id === $store.state.microsoft.me.id"
+            v-if="
+              isMessageHovered &&
+                message.from.user.id === $store.state.microsoft.me.id
+            "
             @click="deleteMessage()"
             @blur="isDeleteConfirmed = false"
           >
@@ -105,7 +137,7 @@
               ]"
             />
             {{ isDeleteConfirmed ? "確認刪除" : "" }}
-          </b-button>
+          </b-button> -->
         </b-button-group>
       </div>
       <div
@@ -191,7 +223,11 @@
 import _ from "lodash";
 import { mapGetters } from "vuex";
 
-import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
+import {
+  MicrosoftStates,
+  PresenceAvailabilities,
+  MessageReactions
+} from "../../../utils/enums";
 import {
   formatDateTimeFromNow,
   formatNameInitials
@@ -214,6 +250,7 @@ export default {
   },
   data: () => {
     return {
+      MessageReactions,
       isMobile: false,
       isAppleIOSWebView: false,
       replies: [],
@@ -225,7 +262,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("microsoft", ["myId", "status", "presences"]),
+    ...mapGetters("microsoft", ["myId", "state", "presences"]),
     messageBodyContent() {
       const contentNode = document.createElement("div");
       contentNode.innerHTML = this.message.body.content;
@@ -286,6 +323,9 @@ export default {
         }).length > 0
       );
     },
+    hasReactions() {
+      return this.message.reactions && this.message.reactions.length;
+    },
     colorVariant() {
       return this.colorVariants[
         Object.keys(this.presences).indexOf(this.message.from.user.id) %
@@ -303,7 +343,7 @@ export default {
     formatDateTimeFromNow,
     formatNameInitials,
     loadReplies() {
-      if (this.status === MicrosoftStatus.LoggedIn) {
+      if (this.state === MicrosoftStates.LoggedIn) {
         return listMessageReplies(
           this.teamId,
           this.channelId,
@@ -360,21 +400,24 @@ export default {
       if (this.$refs["content"]) {
         Array.from(this.$refs["content"].getElementsByTagName("at")).map(i => {
           let memberName = i.textContent;
-          let memberId = this.message.mentions[i.getAttribute("id")].mentioned
-            .user.id;
-          i.title = memberName;
-          i.innerHTML = '<i class="fa fa-user"></i> ' + memberName;
-          i.classList.add("badge-secondary");
-          i.classList.add("badge-pill");
-          i.classList.add("text-light");
-          i.classList.add("text-nowrap");
-          i.classList.add("cursor-pointer");
-          i.addEventListener("click", () => {
-            this.mention("member", {
-              value: memberName,
-              mentionedUserId: memberId
+          let member = this.message.mentions[i.getAttribute("id")].mentioned
+            .user;
+          if (member) {
+            let memberId = member.id;
+            i.title = memberName;
+            i.innerHTML = '<i class="fa fa-user"></i> ' + memberName;
+            i.classList.add("badge-secondary");
+            i.classList.add("badge-pill");
+            i.classList.add("text-light");
+            i.classList.add("text-nowrap");
+            i.classList.add("cursor-pointer");
+            i.addEventListener("click", () => {
+              this.mention("member", {
+                value: memberName,
+                mentionedUserId: memberId
+              });
             });
-          });
+          }
         });
 
         let re =
@@ -420,20 +463,12 @@ export default {
               i
                 .getAttribute("target-src")
                 .match(
-                  /^https:\/\/graph.microsoft.com\/beta\/teams\/.*\/channels\/.*\/messages\/.*\/hostedContents\/.*\/\$value$/
+                  /^https:\/\/graph.microsoft.com\/beta\/.*\/hostedContents\/.*\/\$value$/
                 )
             );
           })
           .map(i => {
-            const hostedContentId = decodeURI(
-              i.getAttribute("target-src")
-            ).split("/")[11];
-            getHostedContent(
-              this.teamId,
-              this.channelId,
-              this.message.id,
-              hostedContentId
-            )
+            getHostedContent(i.getAttribute("target-src"))
               .then(img => {
                 i.src = URL.createObjectURL(img);
               })

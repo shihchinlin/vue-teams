@@ -2,32 +2,32 @@
   <Spinner
     class="vue-teams"
     v-if="
-      !$store.state.microsoft.status ||
-        $store.state.microsoft.status === MicrosoftStatus.LoggingIn
+      !$store.state.microsoft.state ||
+        $store.state.microsoft.state === MicrosoftStates.LoggingIn
     "
   />
   <Forbidden
-    v-else-if="$store.state.microsoft.status === MicrosoftStatus.Forbidden"
+    v-else-if="$store.state.microsoft.state === MicrosoftStates.Forbidden"
   />
   <GatewayTimeout
-    v-else-if="$store.state.microsoft.status === MicrosoftStatus.GatewayTimeout"
+    v-else-if="$store.state.microsoft.state === MicrosoftStates.GatewayTimeout"
   />
   <InternalServerError
     v-else-if="
-      $store.state.microsoft.status === MicrosoftStatus.InternalServerError
+      $store.state.microsoft.state === MicrosoftStates.InternalServerError
     "
   />
   <ServiceUnavailable
     v-else-if="
-      $store.state.microsoft.status === MicrosoftStatus.ServiceUnavailable
+      $store.state.microsoft.state === MicrosoftStates.ServiceUnavailable
     "
   />
   <Unauthorized
-    v-else-if="$store.state.microsoft.status === MicrosoftStatus.Unauthorized"
+    v-else-if="$store.state.microsoft.state === MicrosoftStates.Unauthorized"
   />
   <UnsupportedMediaType v-else-if="!teamId && !channelId" />
   <div
-    v-else-if="$store.state.microsoft.status === MicrosoftStatus.LoggedIn"
+    v-else-if="$store.state.microsoft.state === MicrosoftStates.LoggedIn"
     ref="channel_side"
     class="vue-teams channel-side position-relative"
   >
@@ -94,7 +94,7 @@ import ServiceUnavailable from "../../errors/ServiceUnavailable";
 import Unauthorized from "../../errors/Unauthorized";
 import UnsupportedMediaType from "../../errors/UnsupportedMediaType";
 
-import { MicrosoftStatus } from "../../../utils/enums";
+import { MicrosoftStates } from "../../../utils/enums";
 import Channel from "./Channel";
 import MessageEditor from "./MessageEditor";
 import Spinner from "../../Spinner";
@@ -120,7 +120,7 @@ export default {
   },
   data: () => {
     return {
-      MicrosoftStatus: MicrosoftStatus,
+      MicrosoftStates: MicrosoftStates,
       isShowingModal: false
     };
   },
@@ -137,7 +137,7 @@ export default {
   },
   methods: {
     async loadChannel() {
-      if (this.$store.state.microsoft.status !== MicrosoftStatus.LoggedIn)
+      if (this.$store.state.microsoft.state !== MicrosoftStates.LoggedIn)
         await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
           tenantId: this.tenantId,
           clientId: this.clientId,

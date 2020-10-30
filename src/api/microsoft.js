@@ -239,16 +239,10 @@ export const listMessageReplies = async (teamId, channelId, messageId) => {
     .then(res => res.value);
 };
 
-export const getHostedContent = async (
-  teamId,
-  channelId,
-  messageId,
-  hostedContentId
-) => {
+export const getHostedContent = async uri => {
+  const endpoint = uri.replace("https://graph.microsoft.com/beta", "");
   return await store.state.microsoft.graph.client
-    .api(
-      `/teams/${teamId}/channels/${channelId}/messages/${messageId}/hostedContents/${hostedContentId}/$value`
-    )
+    .api(endpoint)
     .version("beta")
     .get();
 };

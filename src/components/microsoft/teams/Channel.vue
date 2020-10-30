@@ -62,7 +62,7 @@ import { mapGetters, mapMutations } from "vuex";
 import VuePerfectScrollbar from "vue-perfect-scrollbar";
 import Intersect from "vue-intersect";
 
-import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
+import { MicrosoftStates, PresenceAvailabilities } from "../../../utils/enums";
 import {
   getTeam,
   getChannel,
@@ -108,17 +108,17 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("microsoft", ["status", "presences"]),
+    ...mapGetters("microsoft", ["state", "presences"]),
     teamId_channelId() {
       return this.teamId + this.channelId;
     }
   },
   methods: {
     ...mapMutations({
-      changeGraphStatus: "microsoft/CHANGE_GRAPH_STATUS"
+      changeGraphState: "microsoft/CHANGE_GRAPH_STATE"
     }),
     loadChannel() {
-      if (this.status === MicrosoftStatus.LoggedIn) {
+      if (this.state === MicrosoftStates.LoggedIn) {
         this.isChannelLoaded = false;
         this.isChannelLoading = true;
         this.messageIterator = null;
@@ -133,20 +133,20 @@ export default {
             });
           })
           .catch(error => {
-            if (error.statusCode === 403)
-              this.changeGraphStatus(MicrosoftStatus.LoggingIn);
-            else if (error.statusCode === 500)
-              this.changeGraphStatus(MicrosoftStatus.InternalServerError);
-            else if (error.statusCode === 503)
-              this.changeGraphStatus(MicrosoftStatus.ServiceUnavailable);
-            else if (error.statusCode === 504)
-              this.changeGraphStatus(MicrosoftStatus.GatewayTimeout);
-            else this.changeGraphStatus(MicrosoftStatus.ServiceUnavailable);
+            if (error.stateCode === 403)
+              this.changeGraphState(MicrosoftStates.LoggingIn);
+            else if (error.stateCode === 500)
+              this.changeGraphState(MicrosoftStates.InternalServerError);
+            else if (error.stateCode === 503)
+              this.changeGraphState(MicrosoftStates.ServiceUnavailable);
+            else if (error.stateCode === 504)
+              this.changeGraphState(MicrosoftStates.GatewayTimeout);
+            else this.changeGraphState(MicrosoftStates.ServiceUnavailable);
           });
       }
     },
     loadMessages() {
-      if (this.status === MicrosoftStatus.LoggedIn) {
+      if (this.state === MicrosoftStates.LoggedIn) {
         let count = 0;
         let callback = incomingMessage => {
           if (incomingMessage.from)
@@ -202,7 +202,7 @@ export default {
       }
     },
     refreshMessages() {
-      if (this.status === MicrosoftStatus.LoggedIn) {
+      if (this.state === MicrosoftStates.LoggedIn) {
         return listChannelMessages(
           this.teamId,
           this.channelId,
@@ -222,7 +222,7 @@ export default {
       } else return Promise.reject();
     },
     getMessage(message) {
-      if (this.status === MicrosoftStatus.LoggedIn) {
+      if (this.state === MicrosoftStates.LoggedIn) {
         return getMessage(this.teamId, this.channelId, message.id).then(
           incomingMessage => {
             let messageIndex = this.messages.indexOf(message);

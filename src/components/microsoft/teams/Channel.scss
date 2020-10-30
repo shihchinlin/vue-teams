@@ -77,10 +77,20 @@
     }
 
     > div > div > .actions {
-      top: -2px;
+      top: 4px;
       right: 0px;
 
+      &.no-header {
+        top: -14px;
+
+        > .btn {
+          background-color: $light;
+        }
+      }
+
       > .btn {
+        line-height: 1;
+        z-index: 1030;
         padding: 0rem 0.25rem;
         font-size: 14px;
       }

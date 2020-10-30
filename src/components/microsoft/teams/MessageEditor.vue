@@ -92,7 +92,7 @@ import "quill/dist/quill.bubble.css";
 import { quillEditor as VueQuillEditor } from "vue-quill-editor";
 import Mention from "quill-mention";
 
-import { MicrosoftStatus, PresenceAvailabilities } from "../../../utils/enums";
+import { MicrosoftStates, PresenceAvailabilities } from "../../../utils/enums";
 import { formatNameInitials } from "../../../utils/utils";
 import {
   sendMessage,
@@ -129,7 +129,7 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("microsoft", ["status", "presences"]),
+    ...mapGetters("microsoft", ["state", "presences"]),
     ...mapGetters({
       isMentioningCard: "card/isCardSelectable",
       isCardDragging: "card/isCardDragging"
@@ -304,7 +304,7 @@ export default {
       return cards.filter(card => card.value.includes(keyword));
     },
     async sendMessage() {
-      if (this.status === MicrosoftStatus.LoggedIn)
+      if (this.state === MicrosoftStates.LoggedIn)
         if (this.body.content !== "") {
           {
             if (this.message) {

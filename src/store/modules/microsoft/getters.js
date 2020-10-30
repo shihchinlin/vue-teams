@@ -2,8 +2,8 @@ export default {
   myId: state => {
     return state.me.id;
   },
-  status: state => {
-    return state.status;
+  state: state => {
+    return state.state;
   },
   presences: state => {
     return state.presences;

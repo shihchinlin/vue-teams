@@ -1,16 +1,15 @@
 import {
-  CHANGE_GRAPH_STATUS,
+  CHANGE_GRAPH_STATE,
   SIGNIN_GRAPH_SUCCESS,
   SIGNIN_GRAPH_FAILED,
   SIGNOUT_GRAPH_SUCCESS,
   SIGNOUT_GRAPH_FAILED
 } from "./types";
-import { PresenceAvailabilities, MicrosoftStatus } from "../../../utils/enums";
+import { PresenceAvailabilities, MicrosoftStates } from "../../../utils/enums";
 
 export default {
-  [CHANGE_GRAPH_STATUS]: (state, payload) => {
-    if (Object.values(MicrosoftStatus).includes(payload))
-      state.status = payload;
+  [CHANGE_GRAPH_STATE]: (state, payload) => {
+    if (Object.values(MicrosoftStates).includes(payload)) state.state = payload;
   },
   [SIGNIN_GRAPH_SUCCESS]: (state, payload) => {
     state.msal.app = payload[0];

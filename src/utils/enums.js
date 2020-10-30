@@ -1,4 +1,4 @@
-export const MicrosoftStatus = Object.freeze({
+export const MicrosoftStates = Object.freeze({
   LoggedOut: "LoggedOut",
   LoggingIn: "LoggingIn",
   LoggedIn: "LoggedIn",
@@ -20,3 +20,30 @@ export const PresenceAvailabilities = Object.freeze({
   Offline: { value: "Offline", colorVariant: "secondary" },
   PresenceUnknown: { value: "PresenceUnknown", colorVariant: "secondary" }
 });
+
+export const MessageReactions = {
+  Like: {
+    icon: "fa fa-thumbs-up",
+    colorVariant: "warning"
+  },
+  Heart: {
+    icon: "fa fa-heart",
+    colorVariant: "danger"
+  },
+  Laugh: {
+    icon: "fa fa-laugh",
+    colorVariant: "warning"
+  },
+  Surprised: {
+    icon: "fa fa-surprise",
+    colorVariant: "warning"
+  },
+  Sad: {
+    icon: "fa fa-frown",
+    colorVariant: "warning"
+  },
+  Angry: {
+    icon: "fa fa-angry",
+    colorVariant: "danger"
+  }
+};

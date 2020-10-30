@@ -1,5 +1,5 @@
 export default {
-  status: undefined,
+  state: undefined,
   msal: {
     auth: undefined
   },
