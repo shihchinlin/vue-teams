@@ -10,7 +10,7 @@
           class="d-flex flex-column justify-content-center align-items-center p-3"
         >
           <img class="d-block mb-3" src="@/assets/img/logo.png" />
-          <div>a Vue.js component for Microsoft Teams</div>
+          <div>a Vue.js component for Microsoft Teams - v{{ version }}</div>
         </b-col>
       </b-row>
       <b-row>
@@ -122,6 +122,11 @@ export default {
       teamId: "0b5efd71-a75a-4963-8ee2-578a286e089c",
       channelId: "19:06e30d5c6be44f4eb7edfe1fad0ab24c@thread.tacv2"
     };
+  },
+  computed: {
+    version() {
+      return process.env.VUE_APP_VERSION;
+    }
   }
 };
 </script>
