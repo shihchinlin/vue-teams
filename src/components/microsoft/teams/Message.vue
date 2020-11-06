@@ -470,6 +470,7 @@ export default {
                 i.removeAttribute("height");
                 i.removeAttribute("width");
                 i.setAttribute("class", "mw-100 cursor-pointer");
+                i.setAttribute("title", "點擊以原始比例檢視圖片");
                 i.addEventListener("click", () => {
                   this.showImageModal(i.src);
                 });
