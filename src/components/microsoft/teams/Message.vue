@@ -4,7 +4,7 @@
       'message',
       !isDeleted || isRecoverable || hasReplies
         ? hasReactions
-          ? 'my-3'
+          ? 'my-4'
           : 'my-2'
         : '',
       'clearfix',
@@ -46,9 +46,8 @@
           button
           badge
           :badge-variant="
-            $store.state.microsoft.presences[message.from.user.id]
-              ? $store.state.microsoft.presences[message.from.user.id]
-                  .colorVariant
+            presences[message.from.user.id]
+              ? presences[message.from.user.id].colorVariant
               : 'secondary'
           "
           :text="formatNameInitials(message.from.user.displayName)"
@@ -87,27 +86,7 @@
           ]"
           v-if="isMessageHovered || true"
         >
-          <template v-for="reaction in Object.keys(MessageReactions)">
-            <b-button
-              :class="'text-' + MessageReactions[reaction].colorVariant"
-              variant="transparent"
-              v-if="
-                message.reactions &&
-                  message.reactions.filter(
-                    i => i.reactionType === reaction.toLowerCase()
-                  ).length
-              "
-              :key="reaction"
-            >
-              <i :class="MessageReactions[reaction].icon" />
-              {{
-                message.reactions.filter(
-                  i => i.reactionType === reaction.toLowerCase()
-                ).length
-              }}
-            </b-button>
-          </template>
-          <!-- <b-button
+          <b-button
             class="text-dark"
             variant="transparent"
             v-if="
@@ -137,7 +116,19 @@
               ]"
             />
             {{ isDeleteConfirmed ? "確認刪除" : "" }}
-          </b-button> -->
+          </b-button>
+          <template v-for="reaction in Object.keys(MessageReactions)">
+            <b-button
+              :class="'text-' + MessageReactions[reaction].colorVariant"
+              variant="transparent"
+              v-if="message.reactions && formatReactionCount(reaction)"
+              v-b-tooltip.hover="formatReactionUserDisplayName(reaction)"
+              :key="reaction"
+            >
+              <i :class="MessageReactions[reaction].icon" />
+              {{ formatReactionCount(reaction) }}
+            </b-button>
+          </template>
         </b-button-group>
       </div>
       <div
@@ -168,6 +159,7 @@
           class="content border-0"
           :teamId="teamId"
           :channelId="channelId"
+          :members="members"
           :messageId="message.id"
           :message="message"
           v-else
@@ -178,6 +170,7 @@
             class="reply"
             :teamId="teamId"
             :channelId="channelId"
+            :members="members"
             :message="reply"
             v-for="reply in replies"
             :key="reply.id"
@@ -206,6 +199,7 @@
       :class="['reply', 'rounded-bottom', 'border-' + colorVariantMe]"
       :teamId="teamId"
       :channelId="channelId"
+      :members="members"
       :messageId="message.id"
       v-if="
         isMessage &&
@@ -243,6 +237,7 @@ export default {
   props: {
     teamId: { type: String, required: true },
     channelId: { type: String, required: true },
+    members: { type: Array, required: true },
     message: {
       type: Object,
       required: true
@@ -471,6 +466,13 @@ export default {
             getHostedContent(i.getAttribute("target-src"))
               .then(img => {
                 i.src = URL.createObjectURL(img);
+                i.removeAttribute("style");
+                i.removeAttribute("height");
+                i.removeAttribute("width");
+                i.setAttribute("class", "mw-100 cursor-pointer");
+                i.addEventListener("click", () => {
+                  this.showImageModal(i.src);
+                });
               })
               .catch(() => {
                 i.src =
@@ -481,6 +483,45 @@ export default {
               });
           });
       }
+    },
+    formatReactionCount(reactionType) {
+      return this.message.reactions.filter(
+        e => e.reactionType === reactionType.toLowerCase()
+      ).length;
+    },
+    formatReactionUserDisplayName(reactionType) {
+      return this.message.reactions
+        .filter(
+          e => e.reactionType === reactionType.toLowerCase() && e.user.user
+        )
+        .map(
+          e =>
+            this.members.find(member => member.userId === e.user.user.id)
+              .displayName
+        )
+        .join("、");
+    },
+    showImageModal(src) {
+      const contentNode = this.$createElement("b-img", {
+        class: {
+          "mw-100": true,
+          "bg-white": true,
+          "p-2": true,
+          border: true,
+          rounded: true
+        },
+        props: { src: src }
+      });
+      this.$bvModal.msgBoxOk([contentNode], {
+        size: "xl",
+        centered: true,
+        buttonSize: "sm",
+        bodyClass: "text-center",
+        contentClass: "bg-transparent border-0 shadow-none",
+        footerClass: "border-0",
+        okVariant: "light",
+        okTitle: "關閉"
+      });
     },
     handleEditorReset() {
       this.isEditing = false;

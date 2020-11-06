@@ -94,11 +94,7 @@ import Mention from "quill-mention";
 
 import { MicrosoftStates, PresenceAvailabilities } from "../../../utils/enums";
 import { formatNameInitials } from "../../../utils/utils";
-import {
-  sendMessage,
-  replyToMessage,
-  listChannelMembers
-} from "../../../api/microsoft";
+import { sendMessage, replyToMessage } from "../../../api/microsoft";
 
 Quill.register("modules/mention", Mention);
 
@@ -109,6 +105,7 @@ export default {
   props: {
     teamId: { type: String, required: true },
     channelId: { type: String, required: true },
+    members: { type: Array, required: true },
     messageId: { type: String, default: null },
     message: { type: Object, default: null }
   },
@@ -121,7 +118,6 @@ export default {
       isMemberMentioned: false,
       isCardMentioned: false,
       colorVariants: ["info", "primary", "success", "warning", "danger"],
-      members: null,
       body: {
         content: ""
       },
@@ -262,18 +258,15 @@ export default {
       insertItem(item);
     },
     async suggestMembers(keyword) {
-      if (this.members === null) {
-        this.members = await listChannelMembers(this.teamId, this.channelId);
-        this.members.forEach(i => {
-          if (!Object.keys(this.presences).includes(i.userId))
-            this.presences[i.userId] = PresenceAvailabilities.PresenceUnknown;
-        });
-        this.members.sort((a, b) => {
-          let a_order = Object.keys(this.presences).indexOf(a.userId);
-          let b_order = Object.keys(this.presences).indexOf(b.userId);
-          return a_order - b_order;
-        });
-      }
+      this.members.forEach(i => {
+        if (!Object.keys(this.presences).includes(i.userId))
+          this.presences[i.userId] = PresenceAvailabilities.PresenceUnknown;
+      });
+      this.members.sort((a, b) => {
+        let a_order = Object.keys(this.presences).indexOf(a.userId);
+        let b_order = Object.keys(this.presences).indexOf(b.userId);
+        return a_order - b_order;
+      });
       return this.members
         .filter(
           member =>
@@ -558,12 +551,6 @@ export default {
         );
       },
       deep: true
-    },
-    teamId() {
-      this.members = null;
-    },
-    channelId() {
-      this.members = null;
     }
   }
 };

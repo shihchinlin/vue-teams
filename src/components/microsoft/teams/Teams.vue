@@ -36,6 +36,7 @@
       v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
       v-if="!isShowingModal"
       @loaded="handleChannelLoaded($event, $refs['channel'].$refs['channel'])"
+      @members="members = $event"
       @reset="scrollToTop($refs['channel'].$refs['channel'])"
       @mentioned="$refs['message_editor'].mention($event.type, $event.mention)"
     />
@@ -43,6 +44,7 @@
       ref="message_editor"
       class="channel fixed"
       v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
+      :members="members"
       v-if="!isShowingModal"
       @replied="$refs['channel'].loadMessages()"
     />
@@ -69,6 +71,7 @@
         ref="channel"
         v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
         @loaded="handleChannelLoaded($event, $refs['channel_modal'])"
+        @members="members = $event"
         @reset="scrollToTop($refs['channel_modal'])"
         @mentioned="
           $refs['message_editor'].mention($event.type, $event.mention)
@@ -78,6 +81,7 @@
         ref="message_editor"
         class="channel fixed"
         v-bind="{ tenantId, clientId, redirectUri, teamId, channelId }"
+        :members="members"
         @replied="$refs['channel'].loadMessages()"
       />
     </b-modal>
@@ -121,6 +125,7 @@ export default {
   data: () => {
     return {
       MicrosoftStates: MicrosoftStates,
+      members: [],
       isShowingModal: false
     };
   },

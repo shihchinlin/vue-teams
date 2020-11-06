@@ -45,6 +45,7 @@
       ref="message"
       :teamId="teamId"
       :channelId="channelId"
+      :members="members"
       :message="message"
       v-for="message in messages"
       :key="message.id"
@@ -67,6 +68,7 @@ import {
   getTeam,
   getChannel,
   refreshPresences,
+  listChannelMembers,
   listChannelMessages,
   listChannelMessagesIterator,
   getMessage
@@ -93,6 +95,7 @@ export default {
     return {
       team: {},
       channel: {},
+      members: [],
       messages: [],
       messageIterator: null,
       isChannelLoaded: false,
@@ -129,7 +132,11 @@ export default {
             this.team = team;
             getChannel(this.teamId, this.channelId).then(channel => {
               this.channel = channel;
-              return this.loadMessages();
+              listChannelMembers(this.teamId, this.channelId).then(members => {
+                this.members = members;
+                this.$emit("members", this.members);
+                return this.loadMessages();
+              });
             });
           })
           .catch(error => {
