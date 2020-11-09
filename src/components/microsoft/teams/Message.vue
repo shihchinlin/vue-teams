@@ -451,7 +451,10 @@ export default {
             });
           });
 
-        Array.from(this.$refs["content"].getElementsByTagName("img"))
+        const images = Array.from(
+          this.$refs["content"].getElementsByTagName("img")
+        );
+        images
           .filter(i => {
             return (
               i.getAttribute("target-src") &&
@@ -469,11 +472,6 @@ export default {
                 i.removeAttribute("style");
                 i.removeAttribute("height");
                 i.removeAttribute("width");
-                i.setAttribute("class", "mw-100 cursor-pointer");
-                i.setAttribute("title", "點擊以原始比例檢視圖片");
-                i.addEventListener("click", () => {
-                  this.showImageModal(i.src);
-                });
               })
               .catch(() => {
                 i.src =
@@ -483,6 +481,13 @@ export default {
                 i.removeAttribute("width");
               });
           });
+        images.map(i => {
+          i.setAttribute("class", "mw-100 cursor-pointer");
+          i.setAttribute("title", "點擊以原始比例檢視圖片");
+          i.addEventListener("click", () => {
+            this.showImageModal(i.src);
+          });
+        });
       }
     },
     formatReactionCount(reactionType) {

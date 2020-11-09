@@ -180,7 +180,7 @@ export default {
         ).then(res => {
           this.messageIterator = res;
           this.$nextTick(() => {
-            this.$emit("loaded");
+            this.emitChannelLoadedDelayed("loaded");
             this.$nextTick(() => {
               this.isChannelLoading = false;
             });
