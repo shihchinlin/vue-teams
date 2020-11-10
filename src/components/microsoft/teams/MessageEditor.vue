@@ -131,6 +131,13 @@ export default {
       isCardDragging: "card/isCardDragging"
     }),
     quillEditorOptions() {
+      const handleKeyEnter = (range, context) => {
+        this.sendMessage();
+      };
+      const handleKeyEsc = (range, context) => {
+        this.$refs["editor"].quill.blur();
+        this.cancelMessageEdit();
+      };
       return {
         theme: "snow",
         placeholder: "請輸入您的討論訊息",
@@ -168,6 +175,18 @@ export default {
             listItemClass:
               "ql-mention-list-item list-group-item list-group-item-action p-2",
             positioningStrategy: "fixed"
+          },
+          keyboard: {
+            bindings: {
+              enter: {
+                key: 13,
+                handler: handleKeyEnter
+              },
+              escape: {
+                key: "escape",
+                handler: handleKeyEsc
+              }
+            }
           }
         }
       };

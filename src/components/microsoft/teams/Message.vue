@@ -3,8 +3,8 @@
     :class="[
       'message',
       !isDeleted || isRecoverable || hasReplies
-        ? hasReactions
-          ? 'my-4'
+        ? hasReactions && isReplyHeaderOmitted
+          ? 'mt-4 mb-2'
           : 'my-2'
         : '',
       'clearfix',
