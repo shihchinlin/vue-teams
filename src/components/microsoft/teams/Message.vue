@@ -86,7 +86,7 @@
           ]"
           v-if="isMessageHovered || true"
         >
-          <b-button
+          <!-- <b-button
             class="text-dark"
             variant="transparent"
             v-if="
@@ -116,7 +116,7 @@
               ]"
             />
             {{ isDeleteConfirmed ? "確認刪除" : "" }}
-          </b-button>
+          </b-button> -->
           <template v-for="reaction in Object.keys(MessageReactions)">
             <b-button
               :class="'text-' + MessageReactions[reaction].colorVariant"
