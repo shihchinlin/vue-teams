@@ -1,7 +1,7 @@
 {
   "name": "vue-teams",
   "description": "VueTeams is a component for integrating Microsoft Teams channel into your own project, based on Vue, BootstrapVue, Microsoft Authentication Library and Microsoft Graph API.",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "main": "./src/index.js",
   "scripts": {
     "serve": "vue-cli-service serve --open",
@@ -19,10 +19,10 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@azure/msal-browser": "^2.5.2",
+    "@azure/msal-browser": "^2.7.0",
     "@fortawesome/fontawesome-free": "^5.15.1",
     "@microsoft/microsoft-graph-client": "^2.1.1",
-    "bootstrap-vue": "^2.17.3",
+    "bootstrap-vue": "^2.19.0",
     "moment": "^2.29.1",
     "quill-mention": "^3.0.0",
     "vue": "^2.6.12",
@@ -33,17 +33,17 @@
     "vuex": "^3.5.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.7",
-    "@vue/cli-plugin-eslint": "^4.5.7",
-    "@vue/cli-service": "^4.5.7",
+    "@vue/cli-plugin-babel": "^4.5.8",
+    "@vue/cli-plugin-eslint": "^4.5.8",
+    "@vue/cli-service": "^4.5.8",
     "babel-eslint": "^10.1.0",
-    "core-js": "^3.6.5",
+    "core-js": "^3.7.0",
     "eslint": "^6.8.0",
-    "eslint-plugin-vue": "^7.0.1",
+    "eslint-plugin-vue": "^7.1.0",
     "gh-pages": "^3.1.0",
     "isomorphic-fetch": "^3.0.0",
     "node-sass": "^4.14.1",
-    "sass-loader": "^10.0.3",
+    "sass-loader": "^10.1.0",
     "vue-template-compiler": "^2.6.12"
   },
   "eslintConfig": {
