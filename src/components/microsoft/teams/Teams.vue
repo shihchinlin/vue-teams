@@ -23,11 +23,18 @@
     "
   />
   <Unauthorized
-    v-else-if="$store.state.microsoft.state === MicrosoftStates.Unauthorized"
+    v-else-if="
+      $store.state.microsoft.state === MicrosoftStates.Unauthorized ||
+        $store.state.microsoft.state === MicrosoftStates.LoggedOut
+    "
   />
   <UnsupportedMediaType v-else-if="!teamId && !channelId" />
   <div
-    v-else-if="$store.state.microsoft.state === MicrosoftStates.LoggedIn"
+    v-else-if="
+      $store.state.microsoft.state === MicrosoftStates.LoggedIn &&
+        teamId !== undefined &&
+        channelId !== undefined
+    "
     ref="channel_side"
     class="vue-teams channel-side position-relative"
   >
@@ -86,6 +93,7 @@
       />
     </b-modal>
   </div>
+  <Spinner class="vue-teams" v-else />
 </template>
 
 <script>

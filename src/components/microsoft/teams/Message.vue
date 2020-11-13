@@ -500,11 +500,12 @@ export default {
         .filter(
           e => e.reactionType === reactionType.toLowerCase() && e.user.user
         )
-        .map(
-          e =>
-            this.members.find(member => member.userId === e.user.user.id)
-              .displayName
-        )
+        .map(e => {
+          const foundMember = this.members.find(
+            member => member.userId === e.user.user.id
+          );
+          return foundMember ? foundMember.displayName : e.user.user.id;
+        })
         .join("、");
     },
     showImageModal(src) {

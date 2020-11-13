@@ -21,7 +21,7 @@ export default {
       !state.graph.client
     ) {
       commit(CHANGE_GRAPH_STATE, MicrosoftStates.LoggingIn);
-      login(tenantId, clientId, redirectUri)
+      return login(tenantId, clientId, redirectUri)
         .then(client => {
           commit(SIGNIN_GRAPH_SUCCESS, client);
           getUser().then(me => {

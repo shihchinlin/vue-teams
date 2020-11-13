@@ -181,10 +181,41 @@ export const getTeam = async teamId => {
   return await store.state.microsoft.graph.client.api(`/teams/${teamId}`).get();
 };
 
+export const searchTeamsByName = async teamNameRegExp => {
+  const teams = await store.state.microsoft.graph.client
+    .api(`/me/joinedTeams`)
+    .get()
+    .then(res => res.value);
+  return teams.filter(e => teamNameRegExp.test(e.displayName));
+};
+
 export const getChannel = async (teamId, channelId) => {
   return await store.state.microsoft.graph.client
     .api(`/teams/${teamId}/channels/${channelId}`)
     .get();
+};
+
+export const searchTeamChannelsByName = async (
+  teamNameRegExp,
+  channelNameRegExp
+) => {
+  const foundTeams = await searchTeamsByName(teamNameRegExp);
+  if (foundTeams.length) {
+    var foundTeamChannels = [];
+    for (var foundTeam of foundTeams) {
+      const channels = await store.state.microsoft.graph.client
+        .api(`/teams/${foundTeam.id}/channels`)
+        .get()
+        .then(res => res.value);
+      const foundChannels = channels.filter(e =>
+        channelNameRegExp.test(e.displayName)
+      );
+      foundChannels.forEach(foundChannel => {
+        foundTeamChannels.push({ team: foundTeam, channel: foundChannel });
+      });
+    }
+    return foundTeamChannels;
+  } else return [];
 };
 
 export const listChannelMembers = async (teamId, channelId) => {
