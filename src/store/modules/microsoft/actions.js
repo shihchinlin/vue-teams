@@ -13,19 +13,15 @@ import { login, logout, getUser } from "../../../api/microsoft";
 export default {
   [SIGNIN_GRAPH_REQUEST]: async (
     { commit, state },
-    { tenantId, clientId, redirectUri }
+    { tenantId, clientId, redirectUri, authProvider = undefined }
   ) => {
-    if (
-      state.state !== MicrosoftStates.LoggedIn ||
-      !state.msal.app ||
-      !state.graph.client
-    ) {
+    if (state.state !== MicrosoftStates.LoggedIn || !state.graph.client) {
       commit(CHANGE_GRAPH_STATE, MicrosoftStates.LoggingIn);
-      return login(tenantId, clientId, redirectUri)
+      return login(tenantId, clientId, redirectUri, authProvider)
         .then(client => {
-          commit(SIGNIN_GRAPH_SUCCESS, client);
+          commit(SIGNIN_GRAPH_SUCCESS, [client]);
           getUser().then(me => {
-            commit(SIGNIN_GRAPH_SUCCESS, [...client, me]);
+            commit(SIGNIN_GRAPH_SUCCESS, [client, me]);
             commit(CHANGE_GRAPH_STATE, MicrosoftStates.LoggedIn);
           });
         })

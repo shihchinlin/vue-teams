@@ -12,10 +12,9 @@ export default {
     if (Object.values(MicrosoftStates).includes(payload)) state.state = payload;
   },
   [SIGNIN_GRAPH_SUCCESS]: (state, payload) => {
-    state.msal.app = payload[0];
-    state.graph.client = payload[1];
-    if (payload.length >= 3) {
-      state.me = payload[2];
+    state.graph.client = payload[0];
+    if (payload.length >= 2) {
+      state.me = payload[1];
       state.presences[state.me.id] = PresenceAvailabilities.PresenceUnknown;
     }
   },
@@ -23,7 +22,6 @@ export default {
     state.error = error;
   },
   [SIGNOUT_GRAPH_SUCCESS]: state => {
-    state.msal.app = undefined;
     state.graph.client = undefined;
   },
   [SIGNOUT_GRAPH_FAILED]: (state, error) => {

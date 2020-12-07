@@ -3,7 +3,6 @@ import { MSALAuthenticationProviderOptions } from "@microsoft/microsoft-graph-cl
 import * as MicrosoftGraphClient from "@microsoft/microsoft-graph-client";
 import store from "@/store";
 import { PresenceAvailabilities } from "../utils/enums";
-import PageIterator from "./PageIterator";
 
 const msalBaseConfig = {
   cache: {
@@ -53,7 +52,7 @@ const tokenRequestScopes = [
   "ChannelMessage.Delete"
 ];
 
-class MSALAuthenticationProvider {
+class ImplicitMSALAuthenticationProvider {
   constructor(msalApplication, options, account) {
     this.options = options;
     this.msalApplication = msalApplication;
@@ -123,39 +122,129 @@ class MSALAuthenticationProvider {
   }
 }
 
-export const login = (tenantId, clientId, redirectUri) => {
-  const msalConfig = Object.assign(msalBaseConfig, {
-    auth: {
-      clientId: clientId,
-      authority: "https://login.microsoftonline.com/" + tenantId,
-      redirectUri: redirectUri
+class PageIterator {
+  constructor(client, pageCollection, callback) {
+    this.client = client;
+    this.collection = pageCollection.value;
+    this.nextLink = pageCollection["@odata.nextLink"];
+    this.deltaLink = pageCollection["@odata.deltaLink"];
+    this.callback = callback;
+    this.complete = false;
+  }
+
+  iterationHelper() {
+    if (this.collection === undefined) {
+      return false;
     }
-  });
-  const msalApplication = new msal.PublicClientApplication(msalConfig);
-  const loginRequest = Object.assign({}, { scopes: loginRequestScopes });
-  return msalApplication.loginPopup(loginRequest).then(loginResponse => {
-    if (loginResponse !== null) {
-      const msalAuthenticationProvider = new MSALAuthenticationProvider(
-        msalApplication,
-        new MSALAuthenticationProviderOptions(tokenRequestScopes),
-        loginResponse.account
-      );
-      const graphClient = MicrosoftGraphClient.Client.initWithMiddleware({
-        authProvider: msalAuthenticationProvider
-      });
-      return [msalApplication, graphClient];
-    } else {
-      return Promise.reject(new Error("Not support multiple accounts"));
+    let advance = true;
+    while (advance && this.collection.length !== 0) {
+      const item = this.collection.shift();
+      advance = this.callback(item);
     }
-  });
+    return advance;
+  }
+
+  async fetchAndUpdateNextPageData() {
+    try {
+      const response = await this.client.api(this.nextLink).get();
+      this.collection = response.value;
+      this.nextLink = response["@odata.nextLink"];
+      this.deltaLink = response["@odata.deltaLink"];
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  getDeltaLink() {
+    return this.deltaLink;
+  }
+
+  async iterate() {
+    try {
+      let advance = this.iterationHelper();
+      while (advance) {
+        if (this.nextLink !== undefined) {
+          await this.fetchAndUpdateNextPageData();
+          advance = this.iterationHelper();
+        } else {
+          advance = false;
+        }
+      }
+      if (this.nextLink === undefined && this.collection.length === 0) {
+        this.complete = true;
+      }
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  async resume() {
+    try {
+      return this.iterate();
+    } catch (error) {
+      throw error;
+    }
+  }
+
+  isComplete() {
+    return this.complete;
+  }
+}
+
+export const login = (
+  tenantId,
+  clientId,
+  redirectUri,
+  authProvider = undefined
+) => {
+  if (!authProvider) {
+    const msalConfig = Object.assign(msalBaseConfig, {
+      auth: {
+        clientId: clientId,
+        authority: "https://login.microsoftonline.com/" + tenantId,
+        redirectUri: redirectUri
+      },
+      cache: {
+        cacheLocation: "localStorage"
+      }
+    });
+    const msalApplication = new msal.PublicClientApplication(msalConfig);
+    const loginRequest = Object.assign({}, { scopes: loginRequestScopes });
+    return msalApplication.loginPopup(loginRequest).then(loginResponse => {
+      if (loginResponse !== null) {
+        const msalAuthenticationProvider = new ImplicitMSALAuthenticationProvider(
+          msalApplication,
+          new MSALAuthenticationProviderOptions(tokenRequestScopes),
+          loginResponse.account
+        );
+        const graphClient = MicrosoftGraphClient.Client.initWithMiddleware({
+          authProvider: msalAuthenticationProvider
+        });
+        return graphClient;
+      } else {
+        return Promise.reject(new Error("Not support multiple accounts"));
+      }
+    });
+  } else {
+    const graphClient = MicrosoftGraphClient.Client.initWithMiddleware({
+      authProvider: authProvider
+    });
+    return new Promise(resolve => {
+      resolve(graphClient);
+    });
+  }
 };
 
 export const logout = async username => {
   const logoutRequest = {
-    account: store.state.microsoft.msal.app.getAccountByUsername(username)
+    account: store.state.microsoft.graph.client.httpClient.middleware.authenticationProvider.msalApplication.getAccountByUsername(
+      username
+    )
   };
 
-  return store.state.microsoft.msal.app.logout(logoutRequest);
+  return store.state.microsoft.graph.client.httpClient.middleware.authenticationProvider.msalApplication.logout(
+    logoutRequest
+  );
 };
 
 export const getUser = async (id = null) => {
