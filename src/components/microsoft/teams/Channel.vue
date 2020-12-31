@@ -51,6 +51,7 @@
       :key="message.id"
       @loaded="emitChannelLoadedDelayed('loaded')"
       @mentioned="$emit('mentioned', $event)"
+      @replied="$emit('replied', $event)"
       @refresh="getMessageThrottled(message)"
     />
   </VuePerfectScrollbar>

@@ -177,6 +177,7 @@
             @loaded="$emit('loaded')"
             @mentioned="mention($event.type, $event.mention)"
             @refresh="loadRepliesThrottled()"
+            @replied="$emit('replied', $event)"
           />
         </div>
       </div>
@@ -540,6 +541,7 @@ export default {
           this.presences[event.from.user.id] =
             PresenceAvailabilities.PresenceUnknown;
         this.replies.push(event);
+        this.$emit("replied", event);
       }
     },
     handleMouseOver(event) {
