@@ -162,6 +162,7 @@
           :members="members"
           :messageId="message.id"
           :message="message"
+          :customized-url-prefix="customizedUrlPrefix"
           v-else
           @reset="handleEditorReset"
         />
@@ -172,6 +173,7 @@
             :channelId="channelId"
             :members="members"
             :message="reply"
+            :customized-url-prefix="customizedUrlPrefix"
             v-for="reply in replies"
             :key="reply.id"
             @loaded="$emit('loaded')"
@@ -202,6 +204,7 @@
       :channelId="channelId"
       :members="members"
       :messageId="message.id"
+      :customized-url-prefix="customizedUrlPrefix"
       v-if="
         isMessage &&
           (!isDeleted || isRecoverable || hasReplies) &&
@@ -242,6 +245,10 @@ export default {
     message: {
       type: Object,
       required: true
+    },
+    customizedUrlPrefix: {
+      type: String,
+      default: window.location.origin + process.env.BASE_URL.slice(0, -1)
     }
   },
   data: () => {
@@ -417,7 +424,12 @@ export default {
         });
 
         let re =
-          "^" + location.origin + process.env.BASE_URL.slice(0, -1) + ".*#";
+          "^(" +
+          this.customizedUrlPrefix +
+          "|" +
+          window.location.origin +
+          process.env.BASE_URL.slice(0, -1) +
+          ")/.*#";
         Array.from(this.$refs["content"].getElementsByTagName("a"))
           .filter(i => i.href.match(new RegExp(re + ".*")))
           .map(i => {
@@ -437,8 +449,11 @@ export default {
               this.mention("card", {
                 value: cardName,
                 href:
-                  location.origin +
-                  location.pathname +
+                  this.customizedUrlPrefix +
+                  window.location.pathname.replace(
+                    process.env.BASE_URL.slice(0, -1),
+                    ""
+                  ) +
                   "#" +
                   encodeURIComponent(cardName)
               });

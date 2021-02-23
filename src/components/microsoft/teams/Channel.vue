@@ -47,6 +47,7 @@
       :channelId="channelId"
       :members="members"
       :message="message"
+      :customized-url-prefix="customizedUrlPrefix"
       v-for="message in messages"
       :key="message.id"
       @loaded="emitChannelLoadedDelayed('loaded')"
@@ -90,7 +91,11 @@ export default {
     clientId: { type: String, required: true },
     redirectUri: { type: String, required: true },
     teamId: { type: String, required: true },
-    channelId: { type: String, required: true }
+    channelId: { type: String, required: true },
+    customizedUrlPrefix: {
+      type: String,
+      default: window.location.origin + process.env.BASE_URL.slice(0, -1)
+    }
   },
   data: function() {
     return {

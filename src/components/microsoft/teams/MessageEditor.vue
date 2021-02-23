@@ -107,7 +107,11 @@ export default {
     channelId: { type: String, required: true },
     members: { type: Array, required: true },
     messageId: { type: String, default: null },
-    message: { type: Object, default: null }
+    message: { type: Object, default: null },
+    customizedUrlPrefix: {
+      type: String,
+      default: window.location.origin + process.env.BASE_URL.slice(0, -1)
+    }
   },
   data: function() {
     return {
@@ -264,9 +268,9 @@ export default {
           '<div class="d-flex align-items-center"><span class="b-avatar mr-2 badge-secondary rounded-circle" style="width: 2.5em; height: 2.5em;"><span class="b-avatar-text"><span class="fa fa-chart-bar"></span></span></span><div class="d-flex flex-column align-items-start text-truncate" style="width: 150px;"> ' +
           item.value +
           ' <small class="d-block text-muted text-truncate" style="width: 150px;" title="' +
-          decodeURIComponent(location.pathname) +
+          decodeURIComponent(window.location.pathname) +
           '"> ' +
-          decodeURIComponent(location.pathname) +
+          decodeURIComponent(window.location.pathname) +
           " </small></div></div>"
         );
       }
@@ -310,7 +314,13 @@ export default {
           id: cardIndex,
           value: card.getAttribute("name"),
           href:
-            location.href + "#" + encodeURIComponent(card.getAttribute("name"))
+            this.customizedUrlPrefix +
+            window.location.pathname.replace(
+              process.env.BASE_URL.slice(0, -1),
+              ""
+            ) +
+            "#" +
+            encodeURIComponent(card.getAttribute("name"))
         };
       });
       return cards.filter(card => card.value.includes(keyword));
@@ -413,8 +423,11 @@ export default {
         this.mention("card", {
           value: payload.content.name,
           href:
-            location.origin +
-            location.pathname +
+            this.customizedUrlPrefix +
+            window.location.pathname.replace(
+              process.env.BASE_URL.slice(0, -1),
+              ""
+            ) +
             "#" +
             encodeURIComponent(payload.content.name)
         });
@@ -450,7 +463,12 @@ export default {
       });
 
       let re =
-        "^" + location.origin + process.env.BASE_URL.slice(0, -1) + ".*#";
+        "^(" +
+        this.customizedUrlPrefix +
+        "|" +
+        window.location.origin +
+        process.env.BASE_URL.slice(0, -1) +
+        ")/.*#";
       mentionNodes = Array.from(
         contentNode.getElementsByTagName("a")
       ).filter(i => i.href.match(new RegExp(re + ".*")));

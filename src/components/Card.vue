@@ -40,7 +40,7 @@ export default {
   },
   computed: {
     isHashtagged() {
-      let hash = decodeURIComponent(location.hash);
+      let hash = decodeURIComponent(window.location.hash);
       return hash && hash === "#" + this.name;
     },
     isCardSelectable() {

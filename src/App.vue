@@ -63,7 +63,7 @@
           <Card name="MentionCard">
             <h6>
               This is an example card for Teams #mentions. You can trigger the
-              feature by typing or clicking # in any editor. Then you might
+              feature by typing or clicking # in message editor. Then you might
               select a card from the list or drag the card to the editor to
               complete the mention.
             </h6>
@@ -75,7 +75,11 @@
                 href="https://shihchinlin.github.io/vue-teams/#MentionCard"
                 target="_blank"
                 >link</a
-              >). You can copy and extend src/components/Card.vue in your own
+              >). You can also provide a <u>customized-url-prefix</u> for the
+              hyperlink.
+            </h6>
+            <h6>
+              Feel free to copy and extend src/components/Card.vue in your own
               project.
             </h6>
           </Card>
@@ -118,7 +122,7 @@ export default {
       process: process,
       tenantId: "4c1aa070-de27-4274-8885-cf5ab1606285",
       clientId: "e809aed6-6e8b-4398-ac0f-3ab2b196a9c6",
-      redirectUri: location.origin + process.env.BASE_URL,
+      redirectUri: window.location.origin + process.env.BASE_URL,
       teamId: "0b5efd71-a75a-4963-8ee2-578a286e089c",
       channelId: "19:06e30d5c6be44f4eb7edfe1fad0ab24c@thread.tacv2"
     };
