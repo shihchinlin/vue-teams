@@ -61,7 +61,7 @@
 <script>
 import _ from "lodash";
 import Vue from "vue";
-import { mapGetters, mapMutations } from "vuex";
+import { mapGetters, mapMutations, mapActions } from "vuex";
 import VuePerfectScrollbar from "vue-perfect-scrollbar";
 import Intersect from "vue-intersect";
 
@@ -69,7 +69,6 @@ import { MicrosoftStates, PresenceAvailabilities } from "../../../utils/enums";
 import {
   getTeam,
   getChannel,
-  refreshPresences,
   listChannelMembers,
   listChannelMessages,
   listChannelMessagesIterator,
@@ -125,6 +124,9 @@ export default {
   methods: {
     ...mapMutations({
       changeGraphState: "microsoft/CHANGE_GRAPH_STATE"
+    }),
+    ...mapActions({
+      _refreshPresences: "microsoft/REFRESH_PRESENCES"
     }),
     loadChannel() {
       if (this.state === MicrosoftStates.LoggedIn) {
@@ -257,7 +259,7 @@ export default {
       this.getMessage(message);
     }, 3000),
     refreshPresencesThrottled: _.throttle(function() {
-      refreshPresences();
+      this._refreshPresences();
     }, 2000),
     handleMouseOver(event) {
       this.refreshMessagesThrottled();

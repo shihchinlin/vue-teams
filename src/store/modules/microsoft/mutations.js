@@ -3,7 +3,8 @@ import {
   SIGNIN_GRAPH_SUCCESS,
   SIGNIN_GRAPH_FAILED,
   SIGNOUT_GRAPH_SUCCESS,
-  SIGNOUT_GRAPH_FAILED
+  SIGNOUT_GRAPH_FAILED,
+  REFRESH_PRESENCES_SUCCESS
 } from "./types";
 import { PresenceAvailabilities, MicrosoftStates } from "../../../utils/enums";
 
@@ -26,5 +27,11 @@ export default {
   },
   [SIGNOUT_GRAPH_FAILED]: (state, error) => {
     state.error = error;
+  },
+  [REFRESH_PRESENCES_SUCCESS]: (state, payload) => {
+    for (let presence of payload.value) {
+      state.presences[presence.id] =
+        PresenceAvailabilities[presence.availability];
+    }
   }
 };

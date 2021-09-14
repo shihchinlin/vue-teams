@@ -1,6 +1,10 @@
-import * as Teams from "./components/microsoft/teams/Teams.vue";
-import * as Channel from "./components/microsoft/teams/Channel.vue";
-import * as Message from "./components/microsoft/teams/Message.vue";
-import * as MessageEditor from "./components/microsoft/teams/MessageEditor.vue";
+import { default as Channel } from "./components/microsoft/teams/Channel.vue";
+import { default as Message } from "./components/microsoft/teams/Message.vue";
+import { default as MessageEditor } from "./components/microsoft/teams/MessageEditor.vue";
 
-export { Teams, Channel, Message, MessageEditor };
+export { Channel, Message, MessageEditor };
+export { default as MicrosoftMixin } from "./mixins/microsoft";
+export { default as OnlineMeetingMixin } from "./mixins/onlineMeeting";
+export { registerMicrosoftModule, registerCardModule } from "./utils/utils";
+export * from "./api/microsoft";
+export { MicrosoftStates } from "./utils/enums";
