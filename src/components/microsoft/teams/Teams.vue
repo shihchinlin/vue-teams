@@ -149,7 +149,7 @@ export default {
   methods: {
     async loginToMicrosoft() {
       if (this.$store.state.microsoft.state !== MicrosoftStates.LoggedIn)
-        await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST");
+        await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {});
     },
     scrollToTop(element) {
       this.$nextTick(() => {
