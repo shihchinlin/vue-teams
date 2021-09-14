@@ -97,8 +97,6 @@
 </template>
 
 <script>
-import modules from "../../../store/modules";
-
 import Forbidden from "../../errors/Forbidden";
 import GatewayTimeout from "../../errors/GatewayTimeout";
 import InternalServerError from "../../errors/InternalServerError";
@@ -137,25 +135,21 @@ export default {
       isShowingModal: false
     };
   },
-  computed: {
-    config() {
-      return JSON.stringify({
-        tenantId: this.tenantId,
-        clientId: this.clientId,
-        redirectUri: this.redirectUri,
-        teamId: this.teamId,
-        channelId: this.channelId
-      });
-    }
-  },
+  // computed: {
+  //   config() {
+  //     return JSON.stringify({
+  //       tenantId: this.tenantId,
+  //       clientId: this.clientId,
+  //       redirectUri: this.redirectUri,
+  //       teamId: this.teamId,
+  //       channelId: this.channelId
+  //     });
+  //   }
+  // },
   methods: {
-    async loadChannel() {
+    async loginToMicrosoft() {
       if (this.$store.state.microsoft.state !== MicrosoftStates.LoggedIn)
-        await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {
-          tenantId: this.tenantId,
-          clientId: this.clientId,
-          redirectUri: this.redirectUri
-        });
+        await this.$store.dispatch("microsoft/SIGNIN_GRAPH_REQUEST", {});
     },
     scrollToTop(element) {
       this.$nextTick(() => {
@@ -190,20 +184,14 @@ export default {
       this.scrollToBottom(element);
     }
   },
-  created() {
-    if (!this.$store.hasModule("microsoft"))
-      this.$store.registerModule("microsoft", modules.microsoft);
-    if (!this.$store.hasModule("card"))
-      this.$store.registerModule("card", modules.card);
-  },
   mounted() {
-    this.loadChannel();
+    this.loginToMicrosoft();
   },
-  watch: {
-    config: function() {
-      this.loadChannel();
-    }
-  }
+  // watch: {
+  //   config: function() {
+  //     this.loginToMicrosoft();
+  //   }
+  // }
 };
 </script>
 

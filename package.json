@@ -1,11 +1,13 @@
 {
   "name": "vue-teams",
   "description": "VueTeams is a component for integrating Microsoft Teams channel into your own project, based on Vue, BootstrapVue, Microsoft Authentication Library and Microsoft Graph API.",
-  "version": "0.0.21",
-  "main": "./src/index.js",
+  "version": "0.0.31",
+  "main": "src/index.js",
+  "types": "src/index.d.ts",
   "scripts": {
     "serve": "vue-cli-service serve --open",
-    "build": "vue-cli-service build",
+    "build:watch": "vue-cli-service build --target lib --name vue-teams ./src/index.js --watch",
+    "build": "vue-cli-service build --target lib --name vue-teams ./src/index.js",
     "lint": "vue-cli-service lint",
     "deploy": "gh-pages -d dist"
   },
@@ -19,18 +21,8 @@
   },
   "license": "MIT",
   "dependencies": {
-    "@azure/msal-browser": "^2.7.0",
-    "@fortawesome/fontawesome-free": "^5.15.1",
-    "@microsoft/microsoft-graph-client": "^2.1.1",
-    "bootstrap-vue": "^2.19.0",
-    "moment": "^2.29.1",
-    "quill-mention": "^3.0.0",
-    "vue": "^2.6.12",
-    "vue-intersect": "^1.1.6",
-    "vue-perfect-scrollbar": "^0.2.1",
-    "vue-quill-editor": "^3.0.6",
-    "vue-spinner": "^1.0.4",
-    "vuex": "^3.5.1"
+    "@azure/msal-browser": "^2.16.1",
+    "@microsoft/microsoft-graph-client": "^3.0.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^4.5.8",
@@ -44,7 +36,17 @@
     "isomorphic-fetch": "^3.0.0",
     "node-sass": "^4.14.1",
     "sass-loader": "^10.1.0",
-    "vue-template-compiler": "^2.6.12"
+    "vue-template-compiler": "^2.6.12",
+    "bootstrap-vue": "^2.19.0",
+    "moment": "^2.29.1",
+    "quill-mention": "^3.0.4",
+    "vue": "^2.6.12",
+    "vue-intersect": "^1.1.6",
+    "vue-perfect-scrollbar": "^0.2.1",
+    "vue-quill-editor": "^3.0.6",
+    "vue-spinner": "^1.0.4",
+    "vuex": "^3.5.1",
+    "@fortawesome/fontawesome-free": "^5.15.1"
   },
   "eslintConfig": {
     "root": true,
