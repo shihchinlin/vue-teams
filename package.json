@@ -6,8 +6,9 @@
   "types": "src/index.d.ts",
   "scripts": {
     "serve": "vue-cli-service serve --open",
-    "build:watch": "vue-cli-service build --target lib --name vue-teams ./src/index.js --watch",
-    "build": "vue-cli-service build --target lib --name vue-teams ./src/index.js",
+    "build:watch": "vue-cli-service build --target lib --name vue-teams --dest lib ./src/index.js --watch",
+    "build:lib": "vue-cli-service build --target lib --name vue-teams --dest lib ./src/index.js",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "deploy": "gh-pages -d dist"
   },

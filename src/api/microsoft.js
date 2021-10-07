@@ -136,3 +136,14 @@ export const updateEvent = async (id, payload) => {
 export const cancelEvent = async (id, payload = {}) => {
   return await client.api(`/me/events/${id}/cancel`).post(payload);
 };
+
+export const getOnlineMeetingByUrl = async url => {
+  return await client
+    .api(`/me/onlineMeetings`)
+    .filter(`JoinWebUrl eq '${url}'`)
+    .get();
+};
+
+export const updateOnlineMeeting = async (id, payload) => {
+  return await client.api(`/me/onlineMeetings/${id}`).patch(payload);
+};

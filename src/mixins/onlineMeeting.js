@@ -2,7 +2,8 @@ import {
   getEvent,
   createEvent,
   updateEvent,
-  cancelEvent
+  cancelEvent,
+  getOnlineMeetingByUrl
 } from "../api/microsoft";
 import { replaceOnlineMeetingBodyContent } from "../utils/utils";
 
@@ -75,10 +76,12 @@ export default {
     async createOnlineMeeting() {
       const payload = this._generateOnlineMeetingPayload();
       try {
-        const response = await createEvent(payload);
+        const event = await createEvent(payload);
+        const onlineMeeting = await getOnlineMeetingByUrl(event.onlineMeeting.joinUrl);
         this.$emit("create-success", {
-          id: response.id,
-          url: response.onlineMeeting.joinUrl
+          id: onlineMeeting.value[0].id,
+          eventId: event.id,
+          url: event.onlineMeeting.joinUrl
         });
       } catch (error) {
         this.$emit("create-failed", error);
