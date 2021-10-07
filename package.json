@@ -1,13 +1,14 @@
 {
   "name": "vue-teams",
   "description": "VueTeams is a component for integrating Microsoft Teams channel into your own project, based on Vue, BootstrapVue, Microsoft Authentication Library and Microsoft Graph API.",
-  "version": "0.0.31",
+  "version": "0.0.4",
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "scripts": {
     "serve": "vue-cli-service serve --open",
-    "build:watch": "vue-cli-service build --target lib --name vue-teams ./src/index.js --watch",
-    "build": "vue-cli-service build --target lib --name vue-teams ./src/index.js",
+    "build:watch": "vue-cli-service build --target lib --name vue-teams --dest lib ./src/index.js --watch",
+    "build:lib": "vue-cli-service build --target lib --name vue-teams --dest lib ./src/index.js",
+    "build": "vue-cli-service build",
     "lint": "vue-cli-service lint",
     "deploy": "gh-pages -d dist"
   },

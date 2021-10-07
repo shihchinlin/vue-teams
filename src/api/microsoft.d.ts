@@ -72,3 +72,7 @@ export const cancelEvent: (
   id: string,
   payload: { comment: string }
 ) => Promise<any>;
+
+export const getOnlineMeetingByUrl: (url: string) => Promise<any>;
+
+export const updateOnlineMeeting: (id: string, payload: any) => Promise<any>;
