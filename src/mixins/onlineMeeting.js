@@ -94,7 +94,7 @@ export default {
       }
       const content = replaceOnlineMeetingBodyContent(
         existedMeeting.body.content,
-        content,
+        this.content,
         "#content-container"
       );
       const payload = Object.assign({}, this._generateOnlineMeetingPayload(), {
