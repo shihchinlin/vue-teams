@@ -1,10 +1,11 @@
-import moment from "moment";
+import dayjs from "dayjs";
+import "dayjs/locale/zh-tw";
 import modules from "../store/modules";
 
-moment.locale("zh-tw");
+dayjs.locale("zh-tw");
 
 export function formatDateTimeFromNow(datetime) {
-  return datetime === "" ? datetime : moment(datetime).fromNow();
+  return datetime === "" ? datetime : dayjs(datetime).fromNow();
 }
 
 export function formatNameInitials(name) {
@@ -16,14 +17,14 @@ export function formatNameInitials(name) {
     : name;
 }
 
-export const registerModule = moduleName => (store, state) => {
+export const registerModule = (moduleName) => (store, state) => {
   if (!store.hasModule(moduleName)) {
     store.registerModule(moduleName, {
       namespaced: true,
       state: Object.assign({}, modules[moduleName].state, state),
       getters: modules[moduleName].getters,
       actions: modules[moduleName].actions,
-      mutations: modules[moduleName].mutations
+      mutations: modules[moduleName].mutations,
     });
   }
 };
@@ -33,10 +34,10 @@ export const registerMicrosoftModule = registerModule("microsoft");
 export const registerCardModule = registerModule("card");
 
 /**
- * 
- * @param {string} onlineMeetingBody 
- * @param {string} newContent 
- * @param {string} containerSelector 
+ *
+ * @param {string} onlineMeetingBody
+ * @param {string} newContent
+ * @param {string} containerSelector
  * @returns replaced body content.
  */
 export const replaceOnlineMeetingBodyContent = (
